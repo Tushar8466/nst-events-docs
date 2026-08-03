@@ -34,7 +34,7 @@
   * `attendance_type` (`attendance_type_enum NOT NULL DEFAULT 'SINGLE'`)
   * `is_locked` (`BOOLEAN NOT NULL DEFAULT false`)
   * `max_capacity` (`INTEGER` — nullable; `NULL` means unlimited capacity)
-  * `registration_count` (`INTEGER NOT NULL DEFAULT 0` — atomically incremented by the `register_event` RPC via `SELECT FOR UPDATE`)
+  * `registration_count` (`INTEGER NOT NULL DEFAULT 0` — atomically incremented by the `register_event` RPC via lock-free atomic increment: `UPDATE ... WHERE registration_count < max_capacity RETURNING registration_count`)
 
 ## `attendance_sessions`
 * **Purpose**: Granular time blocks requiring check-in.

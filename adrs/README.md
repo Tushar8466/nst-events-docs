@@ -15,7 +15,7 @@ All architectural contradictions identified during the technical audit have been
 ### Resolved Audit Findings (2026-06-09)
 1. **Leaderboard MV Refresh**: Changed from row-level triggers to `pg_cron` scheduled refresh every 5 minutes.
 2. **Offline Attendance**: Restricted to organizer devices (`CLUB_ADMIN`/`CORE_MEMBER`) in Operations Mode. Students must validate synchronously.
-3. **Registration Capacity**: Added `max_capacity` and `registration_count` to `events` table with explicit `SELECT FOR UPDATE` pattern.
+3. **Registration Capacity**: Added `max_capacity` and `registration_count` to `events` table with lock-free atomic increment pattern (`UPDATE ... WHERE registration_count < max_capacity RETURNING registration_count`).
 4. **Audit Trigger Actor**: Triggers use `current_user_id()` reading `app.user_id` session variable via `withUserContext` wrapper.
 5. **Storage URL Validation**: Express must validate domain and path before saving client-provided media URLs.
 6. **Soft-Delete Cascading**: Moved from application-layer to PostgreSQL database triggers.
@@ -57,7 +57,7 @@ NST-Events V1 will not support file uploads. All avatar, banner, logo, certifica
 * [ADR-023: Use PostgreSQL Full Text Search](./adr-023-use-postgresql-full-text-search.md)
 * [ADR-025: Administration should happen on web dashboards](./adr-025-administration-should-happen-on-web-dashboards.md)
 * [ADR-026: Mobile application should be student-first](./adr-026-mobile-application-should-be-student-first.md)
-* [ADR-027: Role hierarchy](./adr-027-role-hierarchy.md)
+* [ADR-027: Role hierarchy (Superseded by two-tier model in 04-enums.md)](./adr-027-role-hierarchy.md)
 * [ADR-028: Introduce faculty roles](./adr-028-introduce-faculty-roles.md)
 * [ADR-029: Use audit logs](./adr-029-use-audit-logs.md)
 * [ADR-030: Attendance fraud mitigation is a first-class requirement](./adr-030-attendance-fraud-mitigation-is-a-first-class-requirement.md)

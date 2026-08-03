@@ -13,7 +13,7 @@ Tested during a High Volume Event simulation (200 scans/min). The manual verific
 Tested creating a massive multi-club event. Multi-club ownership logic correctly updated breadcrumbs and approval routing.
 
 ## New Club Admin
-Testing first-login UX. Empty states correctly directed them to draft their first event.
+Testing first-loginv UX. Empty states correctly directed them to draft their first event.
 
 ## Faculty Admin & Platform Admin
 High-level queues loaded cleanly.

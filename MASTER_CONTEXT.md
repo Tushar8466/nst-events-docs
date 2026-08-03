@@ -57,14 +57,18 @@ RLS is a guardrail, not a full authorization system. Express makes the primary p
 
 ---
 
-## User Roles
-- **Student**: Base role; can view events, register, and mark attendance.
-- **Member**: Associated with specific clubs.
-- **Core Member**: Elevated club privileges.
-- **Club Admin**: Full management over a specific club's events and roster.
-- **Faculty Mentor**: Faculty oversight for clubs.
-- **Faculty Admin**: Administrative capabilities over academic/faculty-led events.
-- **Platform Admin**: Superuser with complete system access.
+## User Roles (Two-Tier Model)
+The platform uses a two-tier role model (see `docs/backend/04-enums.md` and `docs/api/multi-role-handling.md`):
+- **`global_role`** (One per user, platform-wide):
+  - `STUDENT`: Base role; can view events, register, and mark attendance.
+  - `FACULTY_ADMIN`: Administrative capabilities over academic/faculty-led events.
+  - `PLATFORM_ADMIN`: Superuser with complete system access.
+- **`club_role`** (Attached per `club_membership`, scoped to that club only; users can hold different roles in different clubs):
+  - `FACULTY_MENTOR`: Faculty oversight for a specific club.
+  - `CLUB_ADMIN`: Full management over a specific club's events and roster.
+  - `CORE_MEMBER`: Elevated club privileges.
+  - `MEMBER`: Associated with a specific club.
+*(Note: There is no single ordinal ranking across the two axes — they are separate axes, not one flat ladder. ADR-027 is superseded by this two-tier model.)*
 
 ---
 

@@ -104,7 +104,7 @@ These tasks involve security-critical logic, complex concurrency, or cross-cutti
 | **JWT + Refresh token rotation** | 2 | Race conditions, token reuse detection — security critical |
 | **RBAC middleware** | 3 | Primary authorization layer — must be correct |
 | **RLS policies (all)** | 1+ | Secondary security layer — must mirror RBAC |
-| **`register_event` RPC** | 5 | `SELECT FOR UPDATE` concurrency — must not oversell |
+| **`register_event` RPC** | 5 | lock-free atomic increment concurrency — must not oversell |
 | **`mark_attendance` RPC** | 6 | TOTP + geofence + device collision — highest complexity RPC |
 | **Offline attendance sync** | 6 | Trust model for organizer-submitted data |
 | **Audit triggers** | 1 | Must capture actor via `current_user_id()` — security critical |

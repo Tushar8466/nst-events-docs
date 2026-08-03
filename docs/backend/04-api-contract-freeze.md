@@ -334,7 +334,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated student |
-| **Description** | Calls `register_event` RPC with `SELECT FOR UPDATE` |
+| **Description** | Calls `register_event` RPC with lock-free atomic increment |
 | **Response 201** | `{ registration_id, status: "REGISTERED" | "WAITLISTED" }` |
 | **Response 409** | Already registered |
 | **Response 422** | Event locked, not PUBLISHED, or registration closed |

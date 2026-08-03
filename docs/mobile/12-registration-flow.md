@@ -8,7 +8,7 @@ NST-Events operates on a strict **Pessimistic Registration Flow**. Because event
 2. **Confirmation Modal**: Explicit user consent.
 3. **Confirm**: User confirms.
 4. **Loading State**: UI blocks further interaction and displays a spinner.
-5. **`register_event` RPC**: Client awaits backend PostgreSQL transaction (which executes `SELECT FOR UPDATE` capacity locks).
+5. **`register_event` RPC**: Client awaits backend PostgreSQL transaction (which executes lock-free atomic capacity updates).
 6. **Response**: Backend replies.
 
 ## Outcomes

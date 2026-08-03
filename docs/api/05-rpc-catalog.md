@@ -10,7 +10,7 @@
 * **Inputs**: `p_event_id`
 * **Outputs**: `registration_id`, `status` (`REGISTERED` or `WAITLISTED`)
 * **Permissions**: Any authenticated student.
-* **Transaction Requirements**: Locks event row with `SELECT * FROM events WHERE id = p_event_id FOR UPDATE`. Checks `max_capacity` against `registration_count`. If capacity available (or unlimited): increments `registration_count` and inserts with `REGISTERED`. If full: inserts with `WAITLISTED` without incrementing count. Entire operation is atomic.
+* **Transaction Requirements**: Uses lock-free atomic increment (`UPDATE events SET registration_count = registration_count + 1 WHERE id = p_event_id AND (max_capacity IS NULL OR registration_count < max_capacity) RETURNING registration_count`). Checks `max_capacity` against `registration_count`. If capacity available (1 row returned): inserts with `REGISTERED`. If full (0 rows returned): inserts with `WAITLISTED` without incrementing count. Entire operation is atomic.
 * **Tables Touched**: `events` (lock + update `registration_count`), `event_registrations` (insert).
 
 ## `create_team(p_event_id, p_team_name)`

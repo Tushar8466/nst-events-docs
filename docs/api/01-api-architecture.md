@@ -33,7 +33,7 @@ graph TD
 All client-facing operations go through Express route handlers. Simple reads, writes, business logic, and complex atomic operations are all Express responsibilities. The concept of clients querying the database directly does not exist in this architecture.
 
 ### 2. PostgreSQL RPCs (called by Express via Prisma)
-For complex atomic operations requiring `SELECT FOR UPDATE` locks or multi-table transactions (e.g., `register_event`, `mark_attendance`), the Express backend calls PostgreSQL stored procedures via Prisma's `$queryRaw` or `$executeRaw`. These RPCs run entirely within the database transaction boundary.
+For complex atomic operations requiring lock-free atomic updates or multi-table transactions (e.g., `register_event`, `mark_attendance`), the Express backend calls PostgreSQL stored procedures via Prisma's `$queryRaw` or `$executeRaw`. These RPCs run entirely within the database transaction boundary.
 
 ### 3. Express Route Handlers (Server-Side Logic)
 Tasks that require external integrations or compute (QR token generation, webhook delivery) run as Express route handlers within the Node.js process.

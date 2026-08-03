@@ -32,7 +32,7 @@ FROZEN
 * Added missing columns: `audit_metadata` (to `attendance_records`), `attendance_type`, `is_locked` (to `events`), and `open_at`, `close_at`, `geofence_radius` (to `attendance_sessions`).
 
 ## Resolved Issues (Post-Audit Freeze Pass — 2026-06-09)
-* Added `max_capacity` (nullable INTEGER) and `registration_count` (INTEGER, default 0) to `events` table for `SELECT FOR UPDATE` capacity locking.
+* Added `max_capacity` (nullable INTEGER) and `registration_count` (INTEGER, default 0) to `events` table for lock-free atomic increment capacity updates (`UPDATE ... WHERE registration_count < max_capacity RETURNING registration_count`).
 * Leaderboard materialized view refresh changed from row-level triggers to `pg_cron` scheduled refresh every 5 minutes.
 * Soft-delete cascade behavior moved from application-layer to PostgreSQL database triggers.
 * `audit_logs.actor_id` now explicitly documented as populated by `current_user_id()` reading `app.user_id` session variable.

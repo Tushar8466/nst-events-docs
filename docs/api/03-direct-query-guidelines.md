@@ -18,7 +18,7 @@ Standard route handlers with a straightforward Prisma query are appropriate for 
 Operations that require atomic state changes, capacity validation, or complex multi-table transactions must invoke a PostgreSQL stored procedure via Prisma's `$queryRaw` / `$executeRaw`, not a plain Prisma model call.
 
 **Examples of operations that MUST use RPCs (called server-side by Express):**
-* **`register_event`**: Requires `SELECT FOR UPDATE` capacity lock. A plain Prisma insert would bypass capacity guarantees.
+* **`register_event`**: Requires lock-free atomic capacity update. A plain Prisma insert would bypass capacity guarantees.
 * **`mark_attendance`**: Requires atomic TOTP validation, geofence check, device collision detection, and record write. Must be an RPC.
 * **`approve_event`**: Triggers state machine transitions with audit logging. Must be atomic.
 * **`delete_club_membership`**: Can orphan teams or events. Requires transactional cleanup logic.

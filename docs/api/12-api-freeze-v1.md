@@ -25,7 +25,7 @@
 * Event archiving access has been expanded to include Faculty roles.
 
 ## Resolved Issues (Post-Audit Freeze Pass — 2026-06-09)
-* `register_event` RPC now explicitly documents `SELECT FOR UPDATE` pattern with `max_capacity` and `registration_count` fields.
+* `register_event` RPC now explicitly documents lock-free atomic increment pattern (`UPDATE ... WHERE registration_count < max_capacity RETURNING registration_count`) with `max_capacity` and `registration_count` fields.
 * `approve_leadership_transfer` and `reject_leadership_transfer` RPCs now include `FACULTY_ADMIN` as a fallback caller.
 * Audit trigger actor identity resolution documented: triggers use `current_user_id()` from `app.user_id` session variable.
 

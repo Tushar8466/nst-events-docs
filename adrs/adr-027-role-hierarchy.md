@@ -1,7 +1,7 @@
 # ADR-027: Role hierarchy
 
 ## Status
-Accepted
+Superseded by two-tier model in 04-enums.md (global_role + club_role)
 
 ## Context
 We need a formalized permission ladder to match the real-world institution.

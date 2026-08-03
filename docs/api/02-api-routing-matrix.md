@@ -5,7 +5,7 @@ All operations are handled by the **Express backend**. Clients never call the da
 | Operation | Express Internal Execution | Reason | Security Requirements |
 |---|---|---|---|
 | View Events | Prisma Query | Simple read; RLS filters rows by user context | Valid JWT + RBAC middleware |
-| Register Event | PostgreSQL RPC (`register_event`) | Requires `SELECT FOR UPDATE` capacity lock | RBAC check + RPC atomic transaction |
+| Register Event | PostgreSQL RPC (`register_event`) | Requires lock-free atomic capacity update | RBAC check + RPC atomic transaction |
 | Join Team | PostgreSQL RPC (`join_team`) | Team size validation and atomic inserts | RBAC check + Validation |
 | Leave Team | PostgreSQL RPC (`leave_team`) | Team leadership reassignment logic | RBAC check + Ownership Check |
 | Approve Event | PostgreSQL RPC (`approve_event`) | State machine transition + audit logs | `FACULTY_MENTOR` role via RBAC |

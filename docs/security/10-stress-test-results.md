@@ -6,7 +6,7 @@ Simulated security audits and architecture validations.
 * **Privilege Escalation**: Attempting to execute `DELETE /events/:id` via Express API without a `CLUB_ADMIN` membership yielded `403 Forbidden` from RBAC middleware. **PASS**.
 * **QR Tampering**: Attempting to replay an expired TOTP token yielded validation failure. **PASS**.
 * **Manual Attendance API Calls**: Attempting to bypass the geofence by hitting the attendance RPC with fake GPS coords outside the radius failed validation. **PASS**.
-* **500 Registrations / Second**: Database capacity locks held strong via `SELECT FOR UPDATE`. No overselling. **PASS**.
+* **500 Registrations / Second**: Database capacity checks held strong via lock-free atomic capacity updates (`UPDATE ... WHERE registration_count < max_capacity RETURNING registration_count`). No overselling. **PASS**.
 * **200 Attendance Scans / Minute**: pgmq deferred processing handled loads smoothly. **PASS**.
 * **Role Revocation**: Revoked a Club Admin's role in the DB; their very next API call was rejected immediately (live role resolution, no JWT claim caching). **PASS**.
 * **Faculty Transfer**: Transferring event ownership updated visibility correctly. **PASS**.
