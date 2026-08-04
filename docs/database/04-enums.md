@@ -1,6 +1,6 @@
 # Enums
 
-> **Status**: FROZEN | **Version**: 1.1 | **Date**: 2026-06-09  
+> **Status**: FROZEN | **Version**: 1.2 | **Date**: 2026-08-04  
 > All enum definitions here are canonical. Every other document (Prisma schema, table catalog, API contracts, schema-architecture) must match this file exactly.
 
 ---
@@ -12,17 +12,33 @@ Tracks the approval and visibility lifecycle of an event.
 * `PUBLISHED` — Faculty-approved. Visible on the student feed; accepts registrations.
 * `ARCHIVED` — Event date has passed. Read-only. Locked from attendance scans and registrations.
 
+## `event_visibility`
+Controls whether a published event is visible campus-wide or restricted.
+* `PUBLIC` — Event is visible to all authenticated users on the student feed.
+* `PRIVATE` — Event is visible only to members of the hosting club(s).
+
 ## `registration_status`
 Manages attendee state and capacity limits.
 * `REGISTERED` — Confirmed seat.
 * `WAITLISTED` — Capacity full; user promoted FIFO when a seat opens.
 * `CANCELLED` — User cancelled or organizer removed.
 
+## `registration_type`
+Declares whether an event accepts individual or team-based registration.
+* `INDIVIDUAL` — Each user registers independently.
+* `TEAM` — Users register as part of a team (use with `teams` table).
+
 ## `attendance_status`
 The formal record of a user's presence for a session.
 * `PRESENT` — User scanned QR code within the geofence during the valid window.
 * `ABSENT` — Session closed with no attendance record for the user.
 * `EXCUSED` — Attendance dispute was reviewed and **APPROVED** by an organizer. Distinct from `PRESENT` (organizer-granted) and `ABSENT` (default). Used exclusively as the `status` value written by the `resolve_attendance_dispute` RPC when `resolution = 'APPROVED'`.
+
+## `attendance_method`
+Records how an attendance entry was created.
+* `QR` — User self-scanned a dynamic QR code within the geofence and time window.
+* `MANUAL` — Organizer or faculty manually marked the user's attendance.
+* `SYSTEM` — Attendance was recorded by an automated system action (e.g., dispute resolution writing an EXCUSED record).
 
 ## `event_type`
 Categorizes the generic event model. The `metadata` JSONB field carries type-specific fields.
