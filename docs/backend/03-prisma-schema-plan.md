@@ -407,7 +407,7 @@ enum HandoverStatus {
 
 ### Materialized View Strategy
 - **Views**: `club_leaderboard_mv`, `student_leaderboard_mv` — defined in SQL migration
-- **Source**: Aggregated from `attendance_records`, `event_results`, `event_registrations`, `leaderboard_scores`
+- **Source**: `leaderboard_scores` only
 - **Refresh**: `pg_cron` job every 5 minutes: `REFRESH MATERIALIZED VIEW CONCURRENTLY`
 - **Manual refresh**: `POST /admin/leaderboard/recalculate` (Platform Admin)
 - **Never**: Row-level triggers for refresh (causes lock contention)

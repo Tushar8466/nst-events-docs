@@ -17,7 +17,7 @@ current_user_id() IN (SELECT user_id FROM club_memberships WHERE role = 'CLUB_AD
 ## Example Policy Matrices
 
 ### `events`
-* **Who can read**: Anyone (If `status = PUBLISHED`), Organizers (If `DRAFT` or `PENDING_APPROVAL`).
+* **Who can read**: Anyone (If `state = PUBLISHED`), Organizers (If `DRAFT` or `PENDING_APPROVAL`).
 * **Who can write (INSERT)**: `CLUB_ADMIN`, `CORE_MEMBER` (Defaults to `DRAFT`).
 * **Who can update**: `CLUB_ADMIN` (while Draft). `FACULTY_MENTOR` (to push to `PUBLISHED`).
 * **Who can delete**: Soft-delete only by `CLUB_ADMIN`.

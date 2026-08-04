@@ -53,7 +53,7 @@ Utilizes the STRIDE methodology.
 
 **Mitigation — Layer 3: Audit dashboard visibility**
   * Dashboard surfaces a warning when device collision is detected.
-  * Club Admin can review flagged records and cross-reference with the dispute system or manually override.
+  * Club Admin can review flagged records and cross-reference with the dispute system. Manual override itself is restricted to Platform Admin via a gated RPC.
 
 **Mitigation — Layer 4: Social deterrent**
   * Leaderboard points and certificates are visible campus-wide.

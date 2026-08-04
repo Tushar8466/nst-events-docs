@@ -20,7 +20,6 @@ FROZEN
 
 ## Future Improvements (Not In Scope For V1)
 * **File uploads deferred**: No file storage provider required for V1. All media URL fields (`avatar_url`, `banner_url`) are nullable and store `NULL`. V1 uses default/generated fallback assets. Storage provider will be selected in V1.1/V2.
-* Materialized views postponed (Real-time queries are sufficient for now).
 * Advanced analytics postponed (Using basic aggregate queries).
 * No cryptographic device signing (Relying on basic heuristics + Geofencing + Dynamic QR).
 * Database partitioning for `attendance_records` postponed until year 2.
