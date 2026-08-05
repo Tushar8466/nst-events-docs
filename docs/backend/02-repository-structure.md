@@ -66,7 +66,8 @@ apps/api/
 │   │   ├── auth/
 │   │   │   ├── auth.router.ts
 │   │   │   ├── auth.service.ts
-│   │   │   └── auth.schema.ts  # Zod request/response DTOs
+│   │   │   ├── auth.schema.ts  # Zod request/response DTOs
+│   │   │   └── google.oauth.ts # Google OAuth client & verification logic
 │   │   ├── users/
 │   │   │   ├── users.router.ts
 │   │   │   ├── users.service.ts
@@ -105,8 +106,9 @@ apps/api/
 │   │       └── sse.service.ts
 │   ├── lib/
 │   │   ├── prisma.ts           # Prisma client singleton
-│   │   ├── db.ts               # withUserContext() wrapper
 │   │   ├── jwt.ts              # JWT sign/verify utilities
+│   │   ├── hash.ts             # Crypto hashing utilities (SHA-256, random strings)
+│   │   ├── cookies.ts          # Cookie configuration and names
 │   │   └── errors.ts           # Typed error classes (AppError, NotFoundError, etc.)
 │   └── types/
 │       └── express.d.ts        # Extended Express Request type (req.user)
@@ -121,6 +123,8 @@ apps/api/
 
 **Allowed Dependencies**: `@nst/database`, `@nst/shared`
 **Forbidden Dependencies**: `@nst/mobile`, `@nst/dashboard` — API must never import frontend code
+
+*Note: `apps/api/src/lib/db.ts` was deprecated in Phase 2 in favor of directly importing `withUserContext` from `@nst/database`.*
 
 ---
 

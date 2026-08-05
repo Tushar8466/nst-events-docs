@@ -27,6 +27,8 @@ Prisma manages table structures, enums, relations, and basic indexes. Everything
 | **PostGIS column types** | SQL migration (override Prisma) | `GEOGRAPHY(Point, 4326)` via `ALTER COLUMN` |
 | **Partial indexes** | SQL migration | `WHERE deleted_at IS NULL` indexes |
 
+*Note on current RLS status (Phase 2)*: Policies have not yet been created in any migration. `withUserContext` is implemented and sets `app.user_id` correctly, but no `CREATE POLICY` statements exist yet. This is expected to land in Phase 3 alongside RBAC middleware — the RLS policies documented below reflect the planned end-state, not current enforcement.
+
 ### Migration Workflow
 1. Define tables and relations in `schema.prisma`
 2. Run `npx prisma migrate dev --create-only` to generate base DDL
@@ -61,7 +63,7 @@ Prisma manages table structures, enums, relations, and basic indexes. Everything
 | **Key Columns** | `user_id UUID NOT NULL FK→users(ON DELETE CASCADE)`, `token_hash TEXT UNIQUE NOT NULL` (SHA-256), `family_id UUID NOT NULL` (Links rotated tokens), `expires_at TIMESTAMPTZ NOT NULL`, `revoked_at TIMESTAMPTZ NULL`, `user_agent TEXT NULL`, `ip_address TEXT NULL` |
 | **Timestamps** | `created_at TIMESTAMPTZ DEFAULT now()` |
 | **Soft Delete** | No — hard delete on cleanup |
-| **Indexes** | `token_hash` UNIQUE B-Tree, `user_id` B-Tree, `expires_at` B-Tree |
+| **Indexes** | `token_hash` UNIQUE B-Tree, `user_id` B-Tree, `expires_at` B-Tree, `family_id` B-Tree (added to avoid full table scans on family-wide revocation) |
 | **Relationships** | Belongs to: `users` (CASCADE) |
 | **Audit** | Not audited (high-churn table) |
 | **RLS** | Not client-accessible. Managed entirely by Express auth module. |

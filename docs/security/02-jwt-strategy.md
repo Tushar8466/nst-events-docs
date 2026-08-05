@@ -35,15 +35,31 @@ CREATE TABLE refresh_tokens (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   revoked_at  TIMESTAMPTZ,                  -- set on logout or compromise
   user_agent  TEXT,                         -- for session management UI
-  ip_address  INET                          -- for anomaly detection
+  ip_address  TEXT                          -- [TECH DEBT] Implemented as TEXT instead of INET (loses subnet-query capability). See tech debt tracker.
 );
 ```
 
+| Property | Value |
+|---|---|
 | **Expiry** | 30 days |
-| **Storage** | HttpOnly, Secure, SameSite=Strict cookie |
+| **Storage** | HttpOnly, Secure in production; relaxed only for local HTTP development (`NODE_ENV !== 'production'`), SameSite=Strict cookie |
 | **Hashing** | Raw token is SHA-256 hashed before DB insert |
 | **Rotation** | On every use — old token revoked, new token issued with the same `family_id` |
 | **Family Revocation**| If a revoked token is used, all tokens with the same `family_id` are revoked |
+
+---
+
+## OAuth CSRF State Cookie
+
+Used exclusively during the Google OAuth login flow to prevent CSRF attacks.
+
+| Property | Value |
+|---|---|
+| **Format** | Signed random string |
+| **Expiry** | Short-lived (10 minutes) |
+| **Storage** | HttpOnly, Secure in production, SameSite=Lax cookie |
+
+*Note*: `SameSite=Lax` is strictly required (instead of `Strict`) because this cookie must survive the top-level cross-site redirect back from `accounts.google.com`. This cookie is completely separate from the refresh token cookie.
 
 ---
 
@@ -73,6 +89,9 @@ CREATE TABLE refresh_tokens (
 6. Generates a new random refresh token, inserts new row with the **same** `family_id`.
 7. Issues a new access JWT.
 8. Sets the new refresh token cookie.
+
+### Refresh Rotation: Concurrent Request Handling
+When a token with `revoked_at` already set is presented again, the system computes the delta between `now()` and `revoked_at`. If `delta <= 5` seconds, it is treated as a benign concurrent-request race (returns 401, does not revoke the family). If `delta > 5` seconds, it is treated as token theft (revokes the entire family, per existing policy). This is implemented via `SELECT ... FOR UPDATE` inside a transaction to serialize concurrent refresh calls on the same token.
 
 ### Logout
 1. Client calls `POST /auth/logout`.

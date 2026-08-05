@@ -36,7 +36,7 @@
 | **Prerequisites** | Phase 1 complete (users, refresh_tokens tables), Google OAuth credentials |
 | **Deliverables** | `GET /auth/google` (redirect), `GET /auth/google/callback` (code exchange, `id_token` verify, domain restrict `@adypu.edu.in`/`@newtonschool.co`, upsert on `google_sub`), `POST /auth/refresh` (rotate token, new JWT), `POST /auth/logout` (revoke, clear cookie); JWT 15-min HS256 `{sub: user_id}`; opaque refresh token (SHA-256 hashed, 30-day, HttpOnly/Secure/SameSite=Strict cookie); `authenticate` middleware; `withUserContext(userId, fn)` Prisma transaction wrapper |
 | **Definition of Done** | New user registers via OAuth with correct `google_sub`; returning user matches `google_sub` without duplication; JWT expires at 15 min; refresh rotation works; revoked tokens rejected; non-institutional domains rejected; `withUserContext` correctly sets `app.user_id` |
-| **Risks** | OAuth redirect URIs environment-specific; refresh token rotation race condition (two simultaneous refresh requests) |
+| **Risks** | OAuth redirect URIs environment-specific; **[Resolved]** Refresh token rotation race condition resolved via `SELECT ... FOR UPDATE` row-level locking + 5-second grace window. **[Resolved Gap-fill]** Concurrent signup race condition (P2002 on email during simultaneous OAuth callbacks) resolved by catching P2002 and degrading gracefully to `findUnique`. |
 | **Dependencies** | Phase 1 |
 
 ---
