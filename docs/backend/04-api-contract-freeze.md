@@ -174,8 +174,8 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 | Field | Value |
 |---|---|
 | **Auth** | Bearer JWT |
-| **Roles** | Any authenticated |
-| **Response 200** | `{ id, name, description, banner_url, status, members: [...], event_count }` |
+| **Roles** | Any authenticated (members array populated only for club members and global admins) |
+| **Response 200** | `{ id, name, description, banner_url, status, members: [...], event_count }` (note: non-members receive `members: []`) |
 
 
 ### `PATCH /clubs/:id/status`

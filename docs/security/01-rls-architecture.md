@@ -16,12 +16,12 @@ Prisma uses a **connection pool** (PgBouncer or the built-in Prisma pool). Conne
 Every protected database operation uses a utility wrapper:
 
 ```typescript
-// lib/db.ts
-import { prisma } from './prisma';
+// packages/database/src/client.ts
+import { PrismaClient } from '@prisma/client';
 
 export async function withUserContext<T>(
   userId: string,
-  fn: (tx: typeof prisma) => Promise<T>
+  fn: (tx: any) => Promise<T>
 ): Promise<T> {
   return prisma.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT set_config('app.user_id', ${userId}, true)`;
@@ -33,6 +33,8 @@ export async function withUserContext<T>(
 Usage in a route handler:
 ```typescript
 // routes/events.ts
+import { withUserContext } from '@nst/database';
+
 router.get('/events', authenticate, async (req, res) => {
   const events = await withUserContext(req.user.id, (tx) =>
     tx.event.findMany({ where: { state: 'PUBLISHED' } })
@@ -40,6 +42,11 @@ router.get('/events', authenticate, async (req, res) => {
   res.json(events);
 });
 ```
+
+### RLS Denial Behavior (Prisma)
+When RLS policies deny access to a row, the database driver (Prisma) surfaces this in different ways depending on the operation type:
+- **`UPDATE` / `DELETE`**: RLS denial is completely silent at the database level. Prisma will attempt to update/delete rows matching the query, find 0 rows due to RLS, and throw a `P2025` error ("Record to update not found"). This intentionally mimics a 404 (Not Found).
+- **`INSERT` / Raw Queries**: RLS denial throws a hard database exception. Prisma surfaces this as a raw SQL error with code `42501` (Insufficient Privilege). It does **not** throw Prisma's generic `P2004` (constraint failed). Application code must catch `err.code === '42501'` to return a 403 Forbidden.
 
 ### Why `set_config(..., true)` not `SET LOCAL`
 `SELECT set_config('app.user_id', '<uuid>', true)` with the third argument `true` is equivalent to `SET LOCAL` — it is transaction-scoped. This is the preferred form when using Prisma's `$executeRaw` because it avoids raw SQL string interpolation for the setting name.
@@ -55,6 +62,33 @@ CREATE OR REPLACE FUNCTION current_user_id() RETURNS uuid AS $$
 $$ LANGUAGE sql STABLE;
 ```
 Policies use `current_user_id()` for clean, consistent identity resolution.
+
+### Pre-Authentication Writes (OAuth Upsert)
+When the application needs to write to a protected table before a user's session is established (e.g., during OAuth login where `current_user_id()` cannot be set because the user does not exist yet), do **not** weaken the table's RLS policies to allow writes when `current_user_id() IS NULL`. Doing so breaks the zero-trust model and allows any query accidentally executing outside `withUserContext` to modify the table.
+
+Instead, use a dedicated **`SECURITY DEFINER` Postgres function**. This explicitly elevates privileges for one highly specific operation while keeping the underlying table completely locked down:
+
+```sql
+CREATE OR REPLACE FUNCTION upsert_oauth_user(p_google_sub TEXT, p_email TEXT, p_full_name TEXT)
+RETURNS SETOF users
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  INSERT INTO users (id, google_sub, email, full_name, global_role)
+  VALUES (gen_random_uuid(), p_google_sub, p_email, p_full_name, 'STUDENT'::"GlobalRole")
+  ON CONFLICT (google_sub) WHERE deleted_at IS NULL
+  DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = EXCLUDED.full_name,
+    updated_at = now()
+  RETURNING *;
+END;
+$$;
+```
+This function hardcodes defaults (like `global_role`) and prevents updates to restricted fields like `deleted_at`, ensuring the privilege elevation cannot be abused.
 
 ## Trust Model
 We operate on a **Zero Trust** internal model. An authenticated JWT proves *identity*. *Authorization* is derived from relational data (`club_memberships`) evaluated at query time — not stored in JWT claims.
