@@ -364,11 +364,11 @@ explicit definitions of done for each phase.
 
 | Item | Detail |
 |---|---|
-| **Deliverables** | `POST /attendance/generate-qr` (TOTP, 15s window); `POST /attendance/mark` → `mark_attendance` RPC (TOTP + ST_DWithin + device collision); `POST /attendance/sync-offline` (organizer batch); `GET /events/:id/attendance`, `GET /users/me/attendance`; dispute system (`POST/GET/PATCH /attendance/disputes`) |
+| **Deliverables** | `POST /attendance/generate-qr` (TOTP, 15s window with ADR-005 format); `POST /attendance/mark` → `mark_attendance` RPC (TOTP + ST_DWithin + device collision, returning `attendance_records` per ADR-005 revision); `POST /attendance/sync-offline` (organizer batch); `GET /events/:id/attendance`, `GET /users/me/attendance`; dispute system (`POST/GET/PATCH /attendance/disputes`) |
 | **Dependencies** | Phase 5 |
 | **Senior-only items** | `mark_attendance` RPC (highest complexity); offline sync trust model; `resolve_attendance_dispute` (SECURITY DEFINER) |
 | **Integration Checkpoint IC-5** | Full QR scan → mark → audit flow works end-to-end |
-| **Definition of Done** | TOTP rotates 15s, expired rejected; geofence via ST_DWithin; device collision flagged (not rejected); offline sync restricted to CLUB_ADMIN/CORE_MEMBER; disputes within 24h; all writes trigger audit logs |
+| **Definition of Done** | TOTP rotates 15s with `±1 window` drift tolerance and `ATTENDANCE_QR_SECRET` (Clarified by ADR-005); geofence via ST_DWithin; device collision flagged (not rejected); offline sync restricted to CLUB_ADMIN/CORE_MEMBER; disputes within 24h; all writes trigger audit logs |
 
 ---
 

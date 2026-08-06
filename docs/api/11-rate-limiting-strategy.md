@@ -13,5 +13,5 @@ Rate limiting is enforced at the **Express API** layer via middleware (e.g., `ex
 * **Notifications**: Clubs restricted to 2 broadcast notifications per week (enforced at the service layer, not the HTTP rate limiter).
 
 ## Documented Reasoning
-These limits protect the database from connection exhaustion and prevent malicious actors from scripting mass-registrations to block legitimate students from attending limited-capacity events. The QR attendance limit specifically prevents TOTP brute-forcing within the 15-second validity window.
+These limits protect the database from connection exhaustion and prevent malicious actors from scripting mass-registrations to block legitimate students from attending limited-capacity events. The QR attendance limit specifically prevents TOTP brute-forcing within the 45-second effective validity window (Clarified by ADR-005).
 

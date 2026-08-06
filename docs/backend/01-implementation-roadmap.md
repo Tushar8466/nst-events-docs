@@ -81,11 +81,23 @@
 
 | Field | Detail |
 |---|---|
-| **Prerequisites** | Phase 5 complete |
-| **Deliverables** | `POST /attendance/generate-qr` (TOTP, CLUB_ADMIN/CORE_MEMBER); `POST /attendance/mark` → `mark_attendance` RPC (TOTP + geofence + device collision); `POST /attendance/sync-offline` (organizer-only batch); `GET /events/:id/attendance`, `GET /users/me/attendance`; dispute system: `POST/GET/PATCH /attendance/disputes`; device collision detection; `audit_metadata` JSONB population |
-| **Definition of Done** | TOTP rotates 15s, expired rejected; geofence via ST_DWithin; device collision flagged not rejected; offline sync restricted to CLUB_ADMIN/CORE_MEMBER; disputes within 24h of event end; all attendance writes trigger audit logs |
-| **Risks** | TOTP clock drift; PostGIS under 200+ simultaneous scans; mock location detection reliability |
+| **Prerequisites** | Phase 5 complete, `ATTENDANCE_QR_SECRET` environment variable configured |
+| **Deliverables** | `POST /attendance/generate-qr` (TOTP, CLUB_ADMIN/CORE_MEMBER); `POST /attendance/mark` → `mark_attendance` RPC (TOTP + geofence + device collision); `POST /attendance/sync-offline` (organizer-only batch); `GET /events/:id/attendance`, `GET /users/me/attendance`; `POST /events/:id/attendance/manual` (Platform Admin manual verification per ADR-005); dispute system: `POST/GET/PATCH /attendance/disputes`; device collision detection; `audit_metadata` JSONB population (per ADR-005) |
+| **Definition of Done** | TOTP rotates 15s with `±1 window` drift policy, expired rejected; geofence via ST_DWithin; device collision flagged not rejected; offline sync restricted to CLUB_ADMIN/CORE_MEMBER; disputes within 24h of event end; all attendance writes trigger audit logs |
+| **Risks** | PostGIS under 200+ simultaneous scans; mock location detection reliability |
 | **Dependencies** | Phase 5 |
+
+---
+
+## Phase 6 (Milestone 5): Leaderboard Engine (Final Phase 5 Milestone)
+
+| Field | Detail |
+|---|---|
+| **Prerequisites** | Phase 5 Milestones 1-4 complete |
+| **Deliverables** | `GET /leaderboard/students`, `GET /leaderboard/clubs`, `POST /admin/leaderboard/recalculate` |
+| **Definition of Done** | Read endpoints rely purely on materialized views; Recalculate strictly invokes `REFRESH MATERIALIZED VIEW CONCURRENTLY` without rebuilding ledger. |
+| **Risks** | Concurrent refresh lock contention |
+| **Dependencies** | Leaderboard materialized views |
 
 ---
 

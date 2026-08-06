@@ -26,22 +26,30 @@
 * **Behavior**: Transitions event status from `PENDING_APPROVAL` to `PUBLISHED`. Triggers push notifications to eligible students.
 * **Security**: Faculty Mentor must be mentor of a club attached to the event.
 
-## `mark_attendance(p_session_id, p_totp, p_lat, p_lng)`
-* **Purpose**: Validates physical presence and issues points.
-* **Inputs**: Session ID, QR TOTP, user GPS coords.
-* **Outputs**: `attendance_id`, `points_awarded`
+## `mark_attendance(p_session_id, p_totp, p_lat, p_lng, p_device_id, p_device_os, p_gps_accuracy, p_mock_location_detected, p_app_version)`
+* **Purpose**: Validates physical presence, issues points, and handles fraud detection.
+* **Inputs**: Session ID, QR TOTP signature, user GPS coords, device forensic data.
+* **Outputs**: `attendance_records` table row (per ADR-005 revision). Express derives API response using `SCORE_RULES.ATTENDANCE`.
 * **Permissions**: Authenticated student.
-* **Tables Touched**: `attendance_records`, `audit_logs`.
+* **Tables Touched**: `attendance_records`, `leaderboard_scores`, `audit_logs`.
 * **Behavior**:
-  1. Geofence validation.
-  2. TOTP validation.
+  1. Geofence validation (PostGIS `ST_DWithin`).
+  2. TOTP validation using `ATTENDANCE_QR_SECRET` allowing ± 1 window drift (per ADR-005).
+  3. Reject mock locations (HTTP 422 mapping).
   3. **Device Collision Check**:
      * Query `attendance_records` where: `session_id` = input `session_id` AND `audit_metadata->>'device_id'` = input `device_id` AND `user_id` != input `user_id`.
      * If result count > 0:
        * Proceed with attendance write (do not reject).
-       * Set `audit_metadata.flagged = true`.
-       * Set `audit_metadata.flag_reason = "device_collision"`.
+       * Set `audit_metadata.device_collision_detected = true` (an immutable audit fact).
        * Insert into `audit_logs`: action: `ATTENDANCE_DEVICE_COLLISION`, `session_id`: input `session_id`, `flagged_user_id`: input `user_id`, `colliding_user_id`: the `user_id` found in collision query, `device_id`: input `device_id`.
+
+## `sync_offline_attendance(p_records)`
+* **Purpose**: Batch process offline attendance records from organizer devices.
+* **Inputs**: JSONB array of attendance payloads containing `session_id`, `user_id`, `scanned_token`, `scan_timestamp`, `device_id`, `gps_lat`, `gps_lng`, `offline_seq`.
+* **Outputs**: JSONB object summarizing processed counts, skips, and errors.
+* **Permissions**: `SECURITY DEFINER`. Route-level RBAC restricts to `CLUB_ADMIN` / `CORE_MEMBER`.
+* **Behavior**: Bypasses TOTP timeframe validation due to offline status, but retains geofence validation. Generates a master `ATTENDANCE_OFFLINE_SYNC` audit log for the entire batch.
+
 
 ## `process_waitlist(p_event_id)`
 * **Purpose**: Moves waitlisted users to registered if capacity frees up.
@@ -60,6 +68,16 @@
 ### `adjust_points_disciplinary`
 * **Purpose**: Corrective manual point adjustment.
 * **Security**: Only callable by Platform Admin. Automatically creates an `ADJUST_POINTS` audit log.
+
+## `manual_mark_attendance`
+* **Caller**: Platform Admin (via `POST /events/:id/attendance/manual`)
+* **Input**: `p_session_id`, `p_user_id`
+* **Return Type**: `attendance_records` row
+* **Responsibilities**: Manually verifies attendance for a user. Bypasses QR, TOTP, and geofence validation. Enforces registration, event published state, session validity, and leaderboard rules.
+* **Security**: `SECURITY DEFINER`. Must verify caller's `global_role = 'PLATFORM_ADMIN'`.
+* **Idempotency**: `ON CONFLICT (session_id, user_id) DO NOTHING`. If record exists, returns existing record without throwing error.
+* **Leaderboard Behavior**: If a new record is inserted, automatically awards `+5` attendance points via `leaderboard_scores` table.
+* **Audit Logging**: Inserts an audit log with action `ATTENDANCE_MANUAL_MARK` and populates `audit_metadata` with `{ "method": "MANUAL" }`. Sets `attendance_records.method` to `MANUAL`.
 
 ## `submit_attendance_dispute`
 * **Caller**: Student (authenticated)

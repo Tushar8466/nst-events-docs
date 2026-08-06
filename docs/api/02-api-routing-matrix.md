@@ -10,8 +10,8 @@ All operations are handled by the **Express backend**. Clients never call the da
 | Leave Team | PostgreSQL RPC (`leave_team`) | Team leadership reassignment logic | RBAC check + Ownership Check |
 | Approve Event | PostgreSQL RPC (`approve_event`) | State machine transition + audit logs | `FACULTY_MENTOR` role via RBAC |
 | Reject Event | PostgreSQL RPC (`reject_event`) | State transition + notification trigger | `FACULTY_MENTOR` role via RBAC |
-| Mark Attendance | Express Route Handler → PostgreSQL RPC | TOTP validation, geofence check, device collision | RBAC + Geofence + Valid Token |
-| Generate QR | Express Route Handler | Cryptographic TOTP seed generation | `CLUB_ADMIN` / Core via RBAC |
+| Mark Attendance | Express Route Handler → PostgreSQL RPC | ADR-005 TOTP validation, geofence check, device collision | RBAC + Geofence + Valid Token |
+| Generate QR | Express Route Handler | Cryptographic `v1` TOTP seed generation (per ADR-005) | `CLUB_ADMIN` / Core via RBAC |
 | Upload Banner | Express Route Handler (pre-signed URL) — **NEEDS REVIEW** | Storage provider TBD | RBAC check before URL is issued |
 | Send Notification | Express → PostgreSQL RPC → pgmq | Defers high-latency push delivery to background worker | `CLUB_ADMIN` / Platform via RBAC |
 | Promote Member | PostgreSQL RPC | Inserts into `club_memberships` + audit | `CLUB_ADMIN` via RBAC |

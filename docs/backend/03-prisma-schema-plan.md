@@ -98,7 +98,7 @@ Prisma manages table structures, enums, relations, and basic indexes. Everything
 | **Indexes** | Composite `(club_id, user_id)`, `user_id` B-Tree |
 | **Relationships** | Belongs to: `users`, `clubs` |
 | **Audit** | Role changes trigger audit log |
-| **RLS** | SELECT: all auth. INSERT/UPDATE/DELETE: Club Admin, Faculty. |
+| **RLS** | SELECT: all auth (Deliberate V1 decision: club rosters are public to all logged-in students). INSERT/UPDATE/DELETE: Club Admin, Faculty. |
 
 ### 5. `events`
 

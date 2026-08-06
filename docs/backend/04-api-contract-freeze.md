@@ -411,7 +411,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 | **Auth** | Bearer JWT |
 | **Roles** | `CLUB_ADMIN`, `CORE_MEMBER` (event organizer) |
 | **Request** | `{ session_id }` |
-| **Response 200** | `{ qr_payload, expires_at }` |
+| **Response 200** | `{ qr_payload, expires_at }` <br> *(Note: `qr_payload` follows ADR-005 format: `v1:{session_id}:{truncated_hmac}` in Base64URL)* |
 | **Rate Limit** | 10/min per user |
 
 ### `POST /attendance/mark`
@@ -421,8 +421,9 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 | **Roles** | Any authenticated (must be registered) |
 | **Request** | `{ session_id, totp_token, latitude, longitude, device_id, device_os, gps_accuracy, mock_location_detected, app_version }` |
 | **Description** | Validates TOTP, geofence, device collision. Writes attendance via RPC. Idempotent: Returns existing record with 200 OK if already marked. |
-| **Response 201** | `{ attendance_id, status: "PRESENT", points_awarded, flagged }` |
-| **Response 422** | TOTP expired, outside geofence, event locked, not registered |
+| **Response 201** | `{ attendance_id, status: "PRESENT", points_awarded, flagged }` <br> *(Express derives `flagged` from `audit_metadata.device_collision_detected` and `points_awarded` from `SCORE_RULES.ATTENDANCE` per ADR-005)* |
+| **Response 200** | Existing record returned verbatim (Idempotent). |
+| **Response 422** | `QR_EXPIRED`, `OUTSIDE_GEOFENCE`, `MOCK_LOCATION_REJECTED`, `EVENT_LOCKED`, `SESSION_CLOSED`, `NOT_REGISTERED` (per ADR-005) |
 | **Rate Limit** | 5/min per user |
 
 ### `POST /attendance/sync-offline`
@@ -433,6 +434,17 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 | **Request** | `{ records: [{ user_id, session_id, scanned_token, scan_timestamp, device_id, gps_lat, gps_lng, offline_seq }] }` |
 | **Description** | Batch offline attendance submission. Geofence validated. TOTP NOT re-validated for offline. Entire batch audited. |
 | **Response 200** | `{ "processed": number, "skipped": number, "errors": [{ "offline_seq": number, "error_code": "string", "message": "string" }] }` |
+
+### `POST /events/:id/attendance/manual`
+| Field | Value |
+|---|---|
+| **Auth** | Bearer JWT |
+| **Roles** | `PLATFORM_ADMIN` only |
+| **Request** | `{ session_id, user_id }` |
+| **Description** | Manual attendance overrides. Bypasses QR, TOTP, and geofence validation. Enforces registration, event/session validity, leaderboard rules, and audit logging (`method = 'MANUAL'`). |
+| **Response 201** | `attendance_records` row |
+| **Response 200** | `attendance_records` row (Idempotent: if already marked) |
+| **Response 422** | `EVENT_LOCKED`, `SESSION_CLOSED`, `NOT_REGISTERED` |
 
 ### `GET /events/:id/attendance`
 | Field | Value |
@@ -483,7 +495,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated |
-| **Query** | `cursor` (string), `limit` (number), `filter_club_id` |
+| **Query** | `cursor` (string), `limit` (number) |
 | **Response 200** | Paginated student leaderboard (from `student_leaderboard_mv`) |
 
 ### `GET /leaderboard/clubs`
@@ -499,8 +511,8 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | `PLATFORM_ADMIN` |
-| **Description** | Triggers `REFRESH MATERIALIZED VIEW CONCURRENTLY` for both MVs |
-| **Response 200** | `{ refreshed_at }` |
+| **Description** | Triggers `REFRESH MATERIALIZED VIEW CONCURRENTLY` for both `student_leaderboard_mv` and `club_leaderboard_mv`. It does NOT rebuild the underlying `leaderboard_scores` ledger. |
+| **Response 200** | `{ "refreshed_at": "string" }` |
 
 ---
 

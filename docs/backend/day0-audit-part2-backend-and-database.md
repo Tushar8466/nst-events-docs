@@ -295,7 +295,7 @@ All RPCs are defined in SQL migration `0006_rpcs/migration.sql`.
 | `reject_event(event_id, actor_id, reason)` | Express | PENDING_APPROVAL → DRAFT; notify Club Admin |
 | `lock_event(event_id)` | Express | Set `is_locked = true` |
 | `unlock_event(event_id)` | Express | Set `is_locked = false` |
-| `mark_attendance(session_id, user_id, totp_token, lat, lng, device_id, ...)` | Express | Validate TOTP + `ST_DWithin` geofence + device collision; insert `attendance_records`; award points |
+| `mark_attendance(...)` | Express | Validate TOTP + `ST_DWithin` geofence + device collision; insert `attendance_records`; returns `attendance_records` (Clarified by ADR-005) |
 | `sync_offline_attendance(records[])` | Express | Batch insert for organizer offline mode; geofence validated; TOTP NOT re-validated |
 | `resolve_attendance_dispute(dispute_id, resolution, actor_id)` | Express | `SECURITY DEFINER`; sets `attendance_records.status = 'EXCUSED'` if APPROVED |
 | `initiate_leadership_transfer(club_id, initiator_id, successor_id)` | Express | Insert `leadership_handover_requests` |

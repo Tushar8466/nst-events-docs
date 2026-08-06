@@ -19,7 +19,7 @@ Operations that require atomic state changes, capacity validation, or complex mu
 
 **Examples of operations that MUST use RPCs (called server-side by Express):**
 * **`register_event`**: Requires lock-free atomic capacity update. A plain Prisma insert would bypass capacity guarantees.
-* **`mark_attendance`**: Requires atomic TOTP validation, geofence check, device collision detection, and record write. Must be an RPC.
+* **`mark_attendance`**: Requires atomic TOTP validation (per ADR-005), geofence check, device collision detection, and record write. Must be an RPC.
 * **`approve_event`**: Triggers state machine transitions with audit logging. Must be atomic.
 * **`delete_club_membership`**: Can orphan teams or events. Requires transactional cleanup logic.
 

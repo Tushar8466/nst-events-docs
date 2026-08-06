@@ -55,7 +55,7 @@ nst-events/
 │   │   │   │   │   ├── attendance.router.ts
 │   │   │   │   │   ├── attendance.service.ts
 │   │   │   │   │   ├── attendance.schema.ts
-│   │   │   │   │   └── totp.ts           # TOTP generation + 15s window validation
+│   │   │   │   │   └── totp.ts           # TOTP generation + ±1 window validation (Clarified by ADR-005)
 │   │   │   │   ├── notifications/
 │   │   │   │   │   ├── notifications.router.ts
 │   │   │   │   │   ├── notifications.service.ts

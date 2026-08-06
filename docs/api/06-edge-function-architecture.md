@@ -6,10 +6,10 @@ The Express backend is responsible for all tasks that cannot safely or correctly
 There is no separate serverless runtime. All server-side logic runs within the Express Node.js process as route handlers or in the separate `nst-worker` deployment.
 
 ## When to Use an Express Route Handler
-* **Cryptographic Generation**: Securely generating the rotating TOTP seeds for QR attendance (`POST /attendance/generate-qr`). The TOTP secret never leaves the server.
+* **Cryptographic Generation**: Securely generating the rotating TOTP seeds for QR attendance (`POST /attendance/generate-qr`). The `ATTENDANCE_QR_SECRET` never leaves the server (Clarified by ADR-005).
 * **External API Integration**: Sending webhooks to Slack or Discord when events enter `PENDING_APPROVAL`; dispatching emails via providers like Resend.
 * **Queue Workers**: Handled by the separate `nst-worker` deployment, which polls `pgmq` to dispatch Push Notifications to the Expo Push API.
-* **Attendance Validation**: HMAC validation + PostGIS geofence check + device collision detection before writing the attendance record via Prisma.
+* **Attendance Validation**: HMAC validation (using `ATTENDANCE_QR_SECRET` and ±1 window per ADR-005) + PostGIS geofence check + device collision detection before writing the attendance record via Prisma.
 
 ## When NOT to Use a Route Handler for Heavy Logic
 * **Standard CRUD reads**: Use a plain Prisma query in the route handler. Do not over-engineer simple data retrieval.

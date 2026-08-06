@@ -5,7 +5,7 @@
 * **Trigger**: HTTP POST from authenticated Dashboard client.
 * **Inputs**: `session_id`
 * **Outputs**: Encrypted QR payload, expiry timestamp.
-* **Dependencies**: Node.js `crypto` / TOTP library.
+* **Dependencies**: Node.js `crypto` (generates `v1` payload per ADR-005; no external TOTP library required).
 * **Security**: RBAC middleware enforces `CLUB_ADMIN` or `CORE_MEMBER` role before handler executes.
 
 ## `nst-worker` Deployment — `notificationWorker`
@@ -21,6 +21,6 @@
 * **Security**: Internal call; not client-accessible.
 
 ## `POST /admin/leaderboard/recalculate`
-* **Purpose**: Re-aggregates club points across the entire season if anomalies are detected.
+* **Purpose**: Triggers `REFRESH MATERIALIZED VIEW CONCURRENTLY` for both `student_leaderboard_mv` and `club_leaderboard_mv` to ensure the materialized views are up-to-date with the underlying `leaderboard_scores` ledger. It does NOT rebuild or mutate historical ledger rows. If a future full rebuild is desired, it will be documented as a completely separate administrative operation.
 * **Trigger**: Manual HTTP POST by Platform Admin via Dashboard.
 * **Security**: RBAC middleware enforces `PLATFORM_ADMIN` role.

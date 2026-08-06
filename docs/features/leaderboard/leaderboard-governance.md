@@ -14,3 +14,4 @@ Any manipulation of the base records triggering point derivation is strictly aud
 
 ## Future Expansion
 In V2, the point model may expand to include "Bounties" for open-source contributions to campus IT systems, automatically integrating with GitHub via a webhook handler in the Express backend.
+

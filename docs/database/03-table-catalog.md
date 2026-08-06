@@ -128,9 +128,9 @@ The `event_registrations` table has been upgraded to include a `participation_ro
   * `user_id UUID`
   * `display_name TEXT`
   * `total_points INTEGER`
-  * `attendance_points INTEGER`
-  * `contribution_points INTEGER`
-  * `competition_points INTEGER`
+  * `attendance_points INTEGER` (Intentionally deferred to V2, currently stubbed as 0)
+  * `contribution_points INTEGER` (Intentionally deferred to V2, currently stubbed as 0)
+  * `competition_points INTEGER` (Intentionally deferred to V2, currently stubbed as 0)
   * `last_refreshed_at TIMESTAMPTZ`
 * **Refresh strategy**: Same as `club_leaderboard_mv` — refreshed asynchronously via `pg_cron` every **5 minutes**. Never refreshed on individual row writes.
 
@@ -167,3 +167,69 @@ The `event_registrations` table has been upgraded to include a `participation_ro
   * **On `DeviceNotRegistered`**: nst-worker immediately hard-deletes the row; no further retry for that token.
   * **Stale cleanup**: `pg_cron` hard-deletes rows where `last_seen_at < now() - interval '90 days'`.
 
+
+## `event_clubs`
+* **Purpose**: Many-to-many relationship mapping an event to multiple clubs (for cross-club collaborations).
+* **Primary Key**: `event_id, club_id`
+* **Columns**:
+  * `event_id UUID`
+  * `club_id UUID`
+  * `is_primary BOOLEAN` — Designates the lead organizing club
+
+## `teams`
+* **Purpose**: Tracks participant groups formed for hackathons or team-based events.
+* **Primary Key**: `id UUID`
+* **Columns**:
+  * `event_id UUID`
+  * `name TEXT`
+  * `leader_id UUID`
+
+## `notifications`
+* **Purpose**: Core table for system-generated alerts delivered to users.
+* **Primary Key**: `id UUID`
+* **Columns**:
+  * `user_id UUID`
+  * `type TEXT` (Enum mapping)
+  * `title TEXT`
+  * `body TEXT`
+  * `metadata JSONB`
+  * `is_read BOOLEAN`
+
+## `notification_preferences`
+* **Purpose**: Stores user-level opt-in/opt-out configuration for different notification types.
+* **Primary Key**: `user_id UUID`
+* **Columns**:
+  * `push_enabled BOOLEAN`
+  * `event_reminders BOOLEAN`
+  * `club_announcements BOOLEAN`
+  * `attendance_alerts BOOLEAN`
+
+## `announcements`
+* **Purpose**: Global or Club-scoped broadcast messages.
+* **Primary Key**: `id UUID`
+* **Columns**:
+  * `club_id UUID` (Nullable for global)
+  * `title TEXT`
+  * `content TEXT`
+  * `author_id UUID`
+
+## `leaderboard_scores`
+* **Purpose**: Immutable ledger tracking all gamification points awarded to users.
+* **Primary Key**: `id UUID`
+* **Columns**:
+  * `user_id UUID`
+  * `club_id UUID`
+  * `event_id UUID`
+  * `points INTEGER`
+  * `source_type TEXT`
+  * `description TEXT`
+
+## `audit_logs`
+* **Purpose**: Centralized write-only immutable ledger for high-impact security and administrative events.
+* **Primary Key**: `id UUID`
+* **Columns**:
+  * `action TEXT`
+  * `actor_id UUID`
+  * `target_id UUID`
+  * `metadata JSONB`
+  * `ip_address TEXT`
