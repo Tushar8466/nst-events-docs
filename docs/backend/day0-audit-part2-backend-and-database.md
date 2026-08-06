@@ -207,7 +207,7 @@ Every domain module follows this exact three-file pattern (from `docs/backend/02
 
 | Layer | Migration File | Contents |
 |---|---|---|
-| PostgreSQL extensions | `0002_extensions` | `CREATE EXTENSION "uuid-ossp"`, `pgcrypto`, `postgis`, `pg_cron`; pgmq install |
+| PostgreSQL extensions | `0002_extensions` | `CREATE EXTENSION "uuid-ossp"`, `pgcrypto`, `postgis`, `pg_cron`; native queue install |
 | Helper function + RLS | `0003_rls_policies` | `current_user_id()` function; all `CREATE POLICY` statements; `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` |
 | Triggers | `0004_triggers` | `updated_at` triggers (all tables), audit triggers (events, club_memberships, attendance_records, event_registrations), soft-delete cascade triggers (event→registrations/sessions/teams, club→memberships/event_clubs) |
 | Views | `0005_views` | `active_events`, `active_clubs`, `active_memberships` — all with `security_invoker = true`, backed by `INSTEAD OF DELETE` triggers |
@@ -215,7 +215,7 @@ Every domain module follows this exact three-file pattern (from `docs/backend/02
 | Materialized views | `0007_materialized_views` | `club_leaderboard_mv`, `student_leaderboard_mv` with `CREATE UNIQUE INDEX` for `CONCURRENTLY` refresh |
 | Full-text search | `0008_search` | Generated `tsvector` columns + GIN indexes on `events`, `clubs`, `users` |
 | pg_cron jobs | `0009_pgcron` | MV refresh every 5 min; expired token cleanup daily |
-| pgmq queues | `0010_pgmq_queues` | `SELECT pgmq.create('notifications')` |
+| native queue queues | `0010_native queue_queues` | `CREATE TABLE notification_jobs` |
 
 ### 6.2 Migration Workflow (Exact Commands)
 
@@ -312,18 +312,18 @@ All RPCs are defined in SQL migration `0006_rpcs/migration.sql`.
 | **Index** | GiST index on `location_geofence` in `0008_search` migration |
 | **Validation** | `ST_DWithin(events.location_geofence, ST_SetSRID(ST_MakePoint(lng, lat), 4326), geofence_radius)` inside `mark_attendance` RPC |
 | **Prisma access** | Read via `prisma.$queryRaw`; write via `prisma.$executeRaw` with parameterized ST functions |
-| **Docker image** | `postgis/postgis:16-3.4` — includes PostGIS extension. pgmq must be compiled separately or use a community image |
+| **Docker image** | `postgis/postgis:16-3.4` — includes PostGIS extension. native queue must be compiled separately or use a community image |
 
-### 6.7 pgmq Strategy
+### 6.7 native queue Strategy
 
 | Aspect | Detail |
 |---|---|
-| **Queue creation** | `SELECT pgmq.create('notifications')` in migration `0010_pgmq_queues` |
+| **Queue creation** | `CREATE TABLE notification_jobs` in migration `0010_native queue_queues` |
 | **Enqueue** | RPCs enqueue within the SAME transaction as the triggering action (e.g., `approve_event` → enqueue → commit) |
-| **Dequeue** | `nst-worker` polls: `SELECT pgmq.read('notifications', 30, 100)` — 30s visibility timeout, batch 100 |
-| **Ack (delete)** | `SELECT pgmq.delete('notifications', msg_id)` after confirmed Expo delivery |
-| **DLQ** | After 3 failures: `SELECT pgmq.archive('notifications', msg_id)` → moves to dead letter archive |
-| **Autovacuum** | Aggressive autovacuum settings on pgmq schema tables to prevent bloat |
+| **Dequeue** | `nst-worker` polls: `SELECT SELECT ... FOR UPDATE SKIP LOCKED` — 30s locked_at timeout, batch 100 |
+| **Ack (delete)** | `SELECT UPDATE notification_jobs SET status = 'COMPLETED'` after confirmed Expo delivery |
+| **DLQ** | After 3 failures: `SELECT UPDATE notification_jobs SET status = 'DEAD_LETTER'` → moves to dead letter archive |
+| **Autovacuum** | Aggressive autovacuum settings on native queue schema tables to prevent bloat |
 
 ### 6.8 Materialized View Strategy
 

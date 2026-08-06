@@ -8,7 +8,7 @@ There is no separate serverless runtime. All server-side logic runs within the E
 ## When to Use an Express Route Handler
 * **Cryptographic Generation**: Securely generating the rotating TOTP seeds for QR attendance (`POST /attendance/generate-qr`). The `ATTENDANCE_QR_SECRET` never leaves the server (Clarified by ADR-005).
 * **External API Integration**: Sending webhooks to Slack or Discord when events enter `PENDING_APPROVAL`; dispatching emails via providers like Resend.
-* **Queue Workers**: Handled by the separate `nst-worker` deployment, which polls `pgmq` to dispatch Push Notifications to the Expo Push API.
+* **Queue Workers**: Handled by the separate `nst-worker` deployment, which polls `native queue` to dispatch Push Notifications to the Expo Push API.
 * **Attendance Validation**: HMAC validation (using `ATTENDANCE_QR_SECRET` and ±1 window per ADR-005) + PostGIS geofence check + device collision detection before writing the attendance record via Prisma.
 
 ## When NOT to Use a Route Handler for Heavy Logic
@@ -26,6 +26,6 @@ All such operations are gated behind Express route handlers.
 
 ## Queue Consumer (nst-worker)
 
-The `pgmq` queue consumer runs as a **separate Kubernetes Deployment** (`nst-worker`), not inside the API process. See [13-worker-deployment.md](./13-worker-deployment.md) for the full deployment model, retry strategy, and failure handling.
+The `native queue` queue consumer runs as a **separate Kubernetes Deployment** (`nst-worker`), not inside the API process. See [13-worker-deployment.md](./13-worker-deployment.md) for the full deployment model, retry strategy, and failure handling.
 
 The API process (`nst-api`) only **enqueues** messages via RPCs. It never polls the queue.

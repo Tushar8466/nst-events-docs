@@ -4,9 +4,9 @@ Based on simulated stress tests and architectural analysis for the target popula
 
 ## Findings
 * **500 concurrent registrations**: Handled gracefully using lock-free atomic capacity updates (`UPDATE events SET registration_count = registration_count + 1 WHERE id = p_event_id AND (max_capacity IS NULL OR registration_count < max_capacity) RETURNING registration_count`). `SELECT FOR UPDATE` is strictly avoided to prevent database lock contention.
-* **200 attendance scans/min**: Processed synchronously via the Express RPC. The database can comfortably handle this write volume. PGMQ is strictly banned for attendance processing to ensure immediate feedback.
+* **200 attendance scans/min**: Processed synchronously via the Express RPC. The database can comfortably handle this write volume. native queue is strictly banned for attendance processing to ensure immediate feedback.
 * **1000 attendee event**: Full Text Search index size increases negligibly. Read replicas not required for V1.
-* **Notification Backlog**: PGMQ worker processes batches of 100 notifications using Expo Push API `send_batch` (one HTTP request per batch). Complete broadcast takes ~20 seconds.
+* **Notification Backlog**: native queue worker processes batches of 100 notifications using Expo Push API `send_batch` (one HTTP request per batch). Complete broadcast takes ~20 seconds.
 * **Role Revocation**: RLS policies evaluate dynamically, meaning revoking a Club Admin instantly removes their edit privileges globally without needing to invalidate cache layers.
 
 ## Connection Pooling (PgBouncer)

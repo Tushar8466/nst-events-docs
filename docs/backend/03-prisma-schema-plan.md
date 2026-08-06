@@ -14,7 +14,7 @@ Prisma manages table structures, enums, relations, and basic indexes. Everything
 | **Tables, columns, enums, relations** | Prisma schema (`schema.prisma`) | All entity definitions |
 | **Basic indexes, unique constraints** | Prisma schema (`@@index`, `@@unique`) | Foreign key indexes, composite uniques |
 | **Temporal CHECK constraints** | SQL migration | `CHECK(start_time < end_time)`, `CHECK(open_at < close_at)` |
-| **PostgreSQL extensions** | SQL migration | `CREATE EXTENSION postgis, pgmq, pg_cron` |
+| **PostgreSQL extensions** | SQL migration | `CREATE EXTENSION postgis, pg_cron` |
 | **RLS policies** | SQL migration | All `CREATE POLICY` statements |
 | **Helper functions** | SQL migration | `current_user_id()` |
 | **Stored procedures (RPCs)** | SQL migration | `register_event()`, `mark_attendance()`, etc. |
@@ -23,7 +23,7 @@ Prisma manages table structures, enums, relations, and basic indexes. Everything
 | **Materialized views** | SQL migration | `club_leaderboard_mv`, `student_leaderboard_mv` |
 | **Generated columns** | SQL migration | `search_vector tsvector GENERATED ALWAYS AS (...)` |
 | **pg_cron jobs** | SQL migration | Leaderboard MV refresh, token cleanup |
-| **pgmq queues** | SQL migration | `SELECT pgmq.create('notifications')` |
+| **Native queues** | SQL migration | `notification_jobs` table |
 | **PostGIS column types** | SQL migration (override Prisma) | `GEOGRAPHY(Point, 4326)` via `ALTER COLUMN` |
 | **Partial indexes** | SQL migration | `WHERE deleted_at IS NULL` indexes |
 
@@ -399,13 +399,13 @@ enum HandoverStatus {
 - **Validation**: `ST_DWithin(events.location_geofence, ST_SetSRID(ST_MakePoint(lng, lat), 4326), geofence_radius)` in `mark_attendance` RPC
 - **Prisma Access**: Read via `$queryRaw`; write via `$executeRaw` with parameterized ST functions
 
-### PGMQ Strategy
-- **Queue creation**: `SELECT pgmq.create('notifications')` in SQL migration
-- **Enqueue**: RPCs enqueue within same transaction as the triggering action (e.g., `approve_event` enqueues notification)
-- **Dequeue**: `nst-worker` polls via `SELECT pgmq.read('notifications', 30, 100)` (30s visibility timeout, batch of 100)
-- **Delete**: `SELECT pgmq.delete('notifications', msg_id)` after successful delivery
-- **DLQ**: After 3 failures, `SELECT pgmq.archive('notifications', msg_id)` moves to DLQ
-- **Autovacuum**: Aggressive settings on pgmq schema tables to prevent bloat
+### Native PostgreSQL Queue Strategy
+- **Queue creation**: `notification_jobs` table defined in Prisma/SQL migration.
+- **Enqueue**: RPCs insert into `notification_jobs` with `status = 'PENDING'` within same transaction as the triggering action (e.g., `approve_event` enqueues notification)
+- **Dequeue**: `nst-worker` polls via `SELECT ... FOR UPDATE SKIP LOCKED` (batch of 100) and updates `status = 'PROCESSING'`
+- **Complete**: Update `status = 'COMPLETED'` after successful delivery
+- **DLQ**: After 3 failures, update `status = 'DEAD_LETTER'` moves to DLQ
+- **Autovacuum**: Aggressive settings on `notification_jobs` table to prevent bloat
 
 ### Materialized View Strategy
 - **Views**: `club_leaderboard_mv`, `student_leaderboard_mv` — defined in SQL migration

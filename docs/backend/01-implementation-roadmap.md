@@ -10,9 +10,9 @@
 | Field | Detail |
 |---|---|
 | **Prerequisites** | Node.js 20 LTS, Docker Desktop, NST GitHub access, PostgreSQL 16+ (Docker) |
-| **Deliverables** | Turborepo monorepo, Docker Compose (PostgreSQL + pgmq), TS strict mode, ESLint/Prettier, CI pipeline, `.env.example` |
-| **Definition of Done** | `npm install` succeeds; `docker compose up` starts PG+pgmq; `npm run dev` starts API with hot reload; TS compiles zero errors |
-| **Risks** | Turborepo workspace config may conflict with Prisma generated client paths; pgmq Docker image availability |
+| **Deliverables** | Turborepo monorepo, Docker Compose (PostgreSQL + native queue), TS strict mode, ESLint/Prettier, CI pipeline, `.env.example` |
+| **Definition of Done** | `npm install` succeeds; `docker compose up` starts PG+native queue; `npm run dev` starts API with hot reload; TS compiles zero errors |
+| **Risks** | Turborepo workspace config may conflict with Prisma generated client paths; native queue Docker image availability |
 | **Dependencies** | None — Phase 0 is the foundation |
 
 ---
@@ -22,9 +22,9 @@
 | Field | Detail |
 |---|---|
 | **Prerequisites** | Phase 0 complete, Docker Compose PostgreSQL running |
-| **Deliverables** | Prisma schema (all tables); SQL migrations for extensions (`uuid-ossp`, `pgcrypto`, `postgis`, `pgmq`), `current_user_id()` helper, all enums, all tables with constraints/indexes/FKs, soft-delete views (`security_invoker=true`), `INSTEAD OF DELETE` triggers, cascade triggers, `updated_at` triggers, generated `search_vector` columns (GIN), GiST index on `location_geofence`, partial unique indexes; seed script; `pg_cron` jobs (leaderboard MV refresh every 5 min, expired token cleanup) |
+| **Deliverables** | Prisma schema (all tables); SQL migrations for extensions (`uuid-ossp`, `pgcrypto`, `postgis`, `native queue`), `current_user_id()` helper, all enums, all tables with constraints/indexes/FKs, soft-delete views (`security_invoker=true`), `INSTEAD OF DELETE` triggers, cascade triggers, `updated_at` triggers, generated `search_vector` columns (GIN), GiST index on `location_geofence`, partial unique indexes; seed script; `pg_cron` jobs (leaderboard MV refresh every 5 min, expired token cleanup) |
 | **Definition of Done** | `npx prisma migrate dev` applies cleanly; all constraints enforced; `current_user_id()` returns UUID inside transaction; seed data loads; PostGIS `ST_DWithin` query works |
-| **Risks** | Prisma cannot manage PG functions/RLS/triggers/views natively — require raw SQL migrations; PostGIS may need custom Docker image; pgmq availability varies by provider |
+| **Risks** | Prisma cannot manage PG functions/RLS/triggers/views natively — require raw SQL migrations; PostGIS may need custom Docker image; native queue availability varies by provider |
 | **Dependencies** | Phase 0 |
 
 ---
@@ -106,8 +106,8 @@
 | Field | Detail |
 |---|---|
 | **Prerequisites** | Phase 4+ (event state transitions trigger notifications) |
-| **Deliverables** | `GET /notifications` (paginated inbox), `PATCH /notifications/:id/read`, `PATCH /notifications/read-all`; `GET/PATCH /notifications/preferences`; pgmq message enqueueing from RPCs; notification payload schema (title, body, type, metadata with routing) |
-| **Definition of Done** | In-app notifications created atomically with triggers; preferences respected; read/unread tracked; metadata has valid deep-link routing |
+| **Deliverables** | `GET /notifications` (paginated inbox), `PATCH /notifications/:id/read`, `PATCH /notifications/read-all`; `GET/PATCH /notifications/preferences`; message enqueueing into native `notification_jobs` table from RPCs; notification payload schema (title, body, type, metadata with routing) |
+| **Definition of Done** | In-app notifications created atomically with triggers; preferences respected (lazily created on first read/upsert); read/unread tracked; metadata has valid deep-link routing |
 | **Risks** | Fan-out for 1000+ users must be efficient; RLS prevents cross-user reads |
 | **Dependencies** | Phase 4 |
 
@@ -130,9 +130,9 @@
 | Field | Detail |
 |---|---|
 | **Prerequisites** | Phase 7 complete |
-| **Deliverables** | `nst-worker` deployment: pgmq polling (5s, batch 100), Expo Push API, retry backoff (1m/5m/15m), DLQ, delivery write-back, `DeviceNotRegistered` handling; `pg_cron`: leaderboard MV refresh (5 min), expired token cleanup, archived event auto-transition; health check endpoint |
-| **Definition of Done** | 50 notifications/sec throughput; retry intervals correct; 3 failures → DLQ; DLQ queryable by Platform Admin; stale push tokens cleaned; MV refreshes without lock contention |
-| **Risks** | Single replica = SPOF (pgmq visibility timeout handles restart); Expo rate limits may throttle bulk notifications |
+| **Deliverables** | `nst-worker` deployment: native queue polling, Expo Push API, application-controlled exponential retry backoff, `WAITING_FOR_RECEIPTS` delay logic (`EXPO_RECEIPT_DELAY_MINUTES`), DLQ via `status='DEAD_LETTER'`, Platform Admin Queue Operations (`GET /admin/queue/monitoring`, `GET /admin/queue/dead-letters`, `POST /admin/queue/dead-letters/:id/replay`), delivery write-back, `DeviceNotRegistered` handling; `pg_cron`: leaderboard MV refresh (5 min), expired token cleanup, `notification_jobs` cleanup (7 days), archived event auto-transition; graceful shutdown (`WORKER_SHUTDOWN_TIMEOUT_MS`); health check endpoint |
+| **Definition of Done** | 50 notifications/sec throughput; exponential retry intervals correct; 4 failures → DLQ; DLQ queryable and replayable transactionally by Platform Admin; stale push tokens cleaned; MV refreshes without lock contention |
+| **Risks** | Single replica = SPOF; Expo rate limits may throttle bulk notifications |
 | **Dependencies** | Phase 7 |
 
 ---
@@ -156,7 +156,7 @@
 | **Prerequisites** | Phase 10 complete |
 | **Deliverables** | **Unit**: JWT, TOTP, role resolution, Zod schemas. **Integration**: OAuth flow (mocked Google), registration capacity locking, attendance with geofence, event state machine, soft-delete cascade, RLS enforcement, notification pipeline. **Load**: 500 concurrent registrations, 200 scans/min, 1000-user broadcast. **Tooling**: Vitest/Jest, Supertest, test DB with migration+seed+teardown, CI pipeline |
 | **Definition of Done** | 80%+ coverage on business logic; all RPCs have integration tests; concurrency tests verify no overselling; RLS tests verify independent enforcement; CI green on all branches |
-| **Risks** | Integration tests need PG with PostGIS+pgmq; mocking Google OAuth requires careful id_token simulation |
+| **Risks** | Integration tests need PG with PostGIS+native queue; mocking Google OAuth requires careful id_token simulation |
 | **Dependencies** | Phase 10 |
 
 ---

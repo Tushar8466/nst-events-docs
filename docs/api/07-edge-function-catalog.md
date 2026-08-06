@@ -9,7 +9,7 @@
 * **Security**: RBAC middleware enforces `CLUB_ADMIN` or `CORE_MEMBER` role before handler executes.
 
 ## `nst-worker` Deployment — `notificationWorker`
-* **Purpose**: Polls the `pgmq` notification queue and dispatches payloads to the Expo Push API.
+* **Purpose**: Polls the `native queue` notification queue and dispatches payloads to the Expo Push API.
 * **Deployment**: Separate Kubernetes Deployment (`nst-worker`, 1 replica). **Not** part of the `nst-api` pod. See `docs/api/13-worker-deployment.md`.
 * **Poll interval**: Every 5 seconds, batch of up to 100 messages.
 * **Dependencies**: Prisma (PostgreSQL), Expo Push API, `EXPO_ACCESS_TOKEN` secret.

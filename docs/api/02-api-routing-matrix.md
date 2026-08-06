@@ -13,7 +13,7 @@ All operations are handled by the **Express backend**. Clients never call the da
 | Mark Attendance | Express Route Handler → PostgreSQL RPC | ADR-005 TOTP validation, geofence check, device collision | RBAC + Geofence + Valid Token |
 | Generate QR | Express Route Handler | Cryptographic `v1` TOTP seed generation (per ADR-005) | `CLUB_ADMIN` / Core via RBAC |
 | Upload Banner | Express Route Handler (pre-signed URL) — **NEEDS REVIEW** | Storage provider TBD | RBAC check before URL is issued |
-| Send Notification | Express → PostgreSQL RPC → pgmq | Defers high-latency push delivery to background worker | `CLUB_ADMIN` / Platform via RBAC |
+| Send Notification | Express → PostgreSQL RPC → native queue | Defers high-latency push delivery to background worker | `CLUB_ADMIN` / Platform via RBAC |
 | Promote Member | PostgreSQL RPC | Inserts into `club_memberships` + audit | `CLUB_ADMIN` via RBAC |
 | Assign Club Admin | PostgreSQL RPC | High-privilege role escalation | `PLATFORM_ADMIN` via RBAC |
 | Create Club | PostgreSQL RPC | Complex setup (memberships, roles, audit) | `PLATFORM_ADMIN` via RBAC |

@@ -11,7 +11,7 @@
 nst-events/
 ├── apps/
 │   ├── api/                    # Express REST API server (nst-api)
-│   ├── worker/                 # pgmq notification worker (nst-worker)
+│   ├── worker/                 # native queue notification worker (nst-worker)
 │   ├── mobile/                 # Expo React Native app
 │   └── dashboard/              # Next.js admin dashboard
 ├── packages/
@@ -19,7 +19,7 @@ nst-events/
 │   ├── config/                 # Shared ESLint, TSConfig, Prettier configs
 │   └── database/               # Prisma schema, migrations, seed, DB utilities
 ├── docker/
-│   ├── docker-compose.yml      # Local dev: PostgreSQL + pgmq
+│   ├── docker-compose.yml      # Local dev: PostgreSQL + native queue
 │   ├── Dockerfile.api          # Production image for nst-api
 │   └── Dockerfile.worker       # Production image for nst-worker
 ├── k8s/
@@ -130,7 +130,7 @@ apps/api/
 
 ### `apps/worker/` — Background Worker (`nst-worker`)
 
-**Purpose**: Separate Node.js process that polls pgmq for notification messages and dispatches them via the Expo Push API. Runs as its own Kubernetes Deployment (1 replica). Does NOT handle HTTP traffic.
+**Purpose**: Separate Node.js process that polls native queue for notification messages and dispatches them via the Expo Push API. Runs as its own Kubernetes Deployment (1 replica). Does NOT handle HTTP traffic.
 
 **Ownership**: Backend team
 
@@ -140,10 +140,10 @@ apps/worker/
 ├── src/
 │   ├── index.ts                # Worker bootstrap + polling loop
 │   ├── consumers/
-│   │   └── notification.consumer.ts  # pgmq poll → Expo Push API
+│   │   └── notification.consumer.ts  # native queue poll → Expo Push API
 │   ├── lib/
 │   │   ├── expo-push.ts        # Expo Push API client
-│   │   └── queue.ts            # pgmq read/delete/dlq helpers
+│   │   └── queue.ts            # native queue read/delete/dlq helpers
 │   └── health.ts               # HTTP health check for K8s liveness probe
 ├── package.json
 └── tsconfig.json
@@ -191,7 +191,7 @@ packages/database/
 │   │   ├── 0001_init/
 │   │   │   └── migration.sql   # Prisma-generated DDL
 │   │   ├── 0002_extensions/
-│   │   │   └── migration.sql   # CREATE EXTENSION postgis, pgmq, etc.
+│   │   │   └── migration.sql   # CREATE EXTENSION postgis, native queue, etc.
 │   │   ├── 0003_rls_policies/
 │   │   │   └── migration.sql   # All RLS policies + current_user_id()
 │   │   ├── 0004_triggers/
@@ -206,8 +206,8 @@ packages/database/
 │   │   │   └── migration.sql   # Generated tsvector columns + GIN indexes
 │   │   ├── 0009_pgcron/
 │   │   │   └── migration.sql   # pg_cron job definitions
-│   │   └── 0010_pgmq_queues/
-│   │       └── migration.sql   # pgmq queue creation
+│   │   └── 0010_native queue_queues/
+│   │       └── migration.sql   # native queue queue creation
 │   └── seed.ts                 # Development seed data
 ├── src/
 │   ├── client.ts               # Prisma client singleton export

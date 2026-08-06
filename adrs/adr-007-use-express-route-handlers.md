@@ -14,7 +14,7 @@ All server-side logic runs inside the **Express backend** as route handlers or s
 Key server-side responsibilities:
 - **QR Token Generation** (`POST /attendance/generate-qr`): Cryptographically generates the rotating TOTP seed. Enforces `CLUB_ADMIN` role check.
 - **Attendance Validation** (`POST /attendance/mark`): HMAC validation, PostGIS geofence check, device collision detection, and atomic record write via Prisma.
-- **Notification Worker**: A background service (setInterval or pg_cron triggered webhook) that polls `pgmq` and dispatches payloads to the Expo Push API.
+- **Notification Worker**: A background service (setInterval or pg_cron triggered webhook) that polls `native queue` and dispatches payloads to the Expo Push API.
 - **Leaderboard Recalculation** (`POST /admin/leaderboard/recalculate`): Manual trigger for Platform Admin to re-aggregate points.
 - **Slack/Webhook Integration**: Posts to Faculty channel when a new event enters `PENDING_APPROVAL` status.
 

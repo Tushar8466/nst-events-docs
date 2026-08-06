@@ -21,7 +21,7 @@ reference version.
 nst-events/
 ├── apps/
 │   ├── api/          @nst/api      Express REST API (nst-api, 2-3 replicas)
-│   ├── worker/       @nst/worker   pgmq notification worker (nst-worker, 1 replica)
+│   ├── worker/       @nst/worker   native queue notification worker (nst-worker, 1 replica)
 │   ├── mobile/       @nst/mobile   Expo React Native student app
 │   └── dashboard/    @nst/dashboard Next.js admin dashboard
 ├── packages/
@@ -61,7 +61,7 @@ Complete this checklist **in order** before writing any business logic.
 #### Pre-Repository (Human decisions needed)
 
 - [ ] **Provision Google OAuth credentials** — Create OAuth 2.0 client in Google Cloud Console. Add redirect URIs: `http://localhost:3000/v1/auth/google/callback` (dev), `https://api.nstsdc.org/v1/auth/google/callback` (prod)
-- [ ] **Decide on pgmq Docker image** — Options: Tembo community image, custom build from `postgis/postgis:16-3.4`, or cloud-hosted PG with pgmq. Must be running locally before Phase 1
+- [ ] **Decide on native queue Docker image** — Options: Tembo community image, custom build from `postgis/postgis:16-3.4`, or cloud-hosted PG with native queue. Must be running locally before Phase 1
 - [ ] **Create GitHub repo** `nst-events` under NST GitHub organization
 - [ ] **Add GitHub Secrets** (for CI): `GHCR_TOKEN`, `NST_CLUSTER_KUBECONFIG`
 - [ ] **Create NST K8s namespace** `nst-events`
@@ -95,7 +95,7 @@ Complete this checklist **in order** before writing any business logic.
 - [ ] Root `.prettierrc.js` extending `@nst/config`
 
 **Docker**
-- [ ] `docker/docker-compose.yml` — PostgreSQL 16 + PostGIS + pgmq
+- [ ] `docker/docker-compose.yml` — PostgreSQL 16 + PostGIS + native queue
 - [ ] `docker/Dockerfile.api` — stub (fill fully in Phase 12)
 - [ ] `docker/Dockerfile.worker` — stub
 
@@ -148,7 +148,7 @@ Complete this checklist **in order** before writing any business logic.
 - [ ] Create `0007_materialized_views/migration.sql` — `club_leaderboard_mv`, `student_leaderboard_mv`
 - [ ] Create `0008_search/migration.sql` — `tsvector` columns + GIN indexes + GiST on `location_geofence`
 - [ ] Create `0009_pgcron/migration.sql` — MV refresh every 5 min; token cleanup daily
-- [ ] Create `0010_pgmq_queues/migration.sql` — `SELECT pgmq.create('notifications')`
+- [ ] Create `0010_native queue_queues/migration.sql` — `CREATE TABLE notification_jobs`
 - [ ] `npx prisma migrate dev` — applies all migrations cleanly
 - [ ] `npx prisma generate` — TypeScript client generated
 - [ ] Create `packages/database/prisma/seed.ts`
@@ -158,7 +158,7 @@ Complete this checklist **in order** before writing any business logic.
 - [ ] All 19 tables exist with correct column types
 - [ ] `SELECT current_user_id()` inside transaction returns UUID
 - [ ] `SELECT ST_DWithin(...)` — PostGIS query executes
-- [ ] `SELECT pgmq.create('test')` — pgmq is functional
+- [ ] `SELECT native queue.create('test')` — native queue is functional
 - [ ] RLS enabled: `SELECT relrowsecurity FROM pg_class WHERE relname = 'events'` → `true`
 - [ ] Seed data: Platform Admin exists, 3 clubs exist, 2 events exist
 
@@ -215,7 +215,7 @@ ORDER   PATH                                          NOTES
 42.     apps/worker/tsconfig.json
 43.     apps/worker/src/index.ts                     Polling loop stub
 44.     apps/worker/src/health.ts                    /health endpoint
-45.     docker/docker-compose.yml                    PG + pgmq locally
+45.     docker/docker-compose.yml                    PG + native queue locally
 46.     docker/Dockerfile.api                        Multi-stage build stub
 47.     docker/Dockerfile.worker                     Multi-stage build stub
 48.     k8s/*.yaml (5 files)                         Manifest stubs
@@ -333,8 +333,8 @@ curl http://localhost:3000/health    # → {"status":"ok"}
 psql postgresql://nst:nst@localhost:5432/nstevents << 'SQL'
 SELECT current_user_id();            -- Should return NULL (no context yet)
 SELECT postgis_version();            -- Should return PostGIS version
-SELECT pgmq.create('test_queue');   -- Should succeed
-DROP TABLE pgmq.q_test_queue;       -- Cleanup
+SELECT native queue.create('test_queue');   -- Should succeed
+DROP TABLE native queue.q_test_queue;       -- Cleanup
 SQL
 
 # ─── Phase 0 DONE ─────────────────────────────────────────────────────────────
@@ -354,7 +354,7 @@ echo "Phase 0 complete. Ready to begin Phase 1: Database Foundation."
 
 | Blocking Gap | Resolution Owner |
 |---|---|
-| pgmq Docker image | Backend Tech Lead — decide by Phase 0 Day 1 |
+| native queue Docker image | Backend Tech Lead — decide by Phase 0 Day 1 |
 | Google OAuth credentials | Platform Admin / Google Cloud access holder |
 | Database hosting provider | Needed before Phase 12; does not block Phases 0–11 |
 | CSRF on mobile | Architecture answer in Part 3 §11: mobile exempt, dashboard uses SameSite=Strict |

@@ -531,7 +531,8 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated (own notifications) |
-| **Response 200** | `{ read_at }` |
+| **Description** | Explicitly idempotent: First request marks the notification as read. Repeated requests do not modify the resource again. The endpoint never fails simply because the notification was already read. |
+| **Response 200** | `{ read_at }` (Existing `read_at` timestamp is returned if already read) |
 
 ### `PATCH /notifications/read-all`
 | Field | Value |
@@ -545,6 +546,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated |
+| **Description** | Returns user preferences. Lifecycle: No row is required during user creation. If no row exists, returns schema defaults. |
 | **Response 200** | `{ push_enabled, event_reminders, club_announcements, attendance_alerts }` |
 
 ### `PATCH /notifications/preferences`
@@ -552,6 +554,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated |
+| **Description** | Performs an upsert. Once persisted, subsequent reads return the stored values. |
 | **Request** | `{ "push_enabled"?: boolean, "event_reminders"?: boolean, "club_announcements"?: boolean, "attendance_alerts"?: boolean }` |
 | **Response 200** | `{ "push_enabled": boolean }` |
 
@@ -598,6 +601,50 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 | **Roles** | `PLATFORM_ADMIN` |
 | **Request** | `{ user_id, points, reason }` |
 | **Response 201** | `{ "id": "string", "points": number }` |
+
+---
+
+## Queue Administration Endpoints
+
+### `GET /admin/queue/monitoring`
+| Field | Value |
+|---|---|
+| **Auth** | Bearer JWT |
+| **Roles** | `PLATFORM_ADMIN` |
+| **Description** | Operational queue monitoring API returning aggregated statistics, not raw rows. |
+| **Response 200** | `{ "queue_depth": number, "dead_letter_count": number, "retry_count": number, "processing_count": number, "waiting_for_receipts_count": number }` |
+| **Response 401** | Unauthorized (missing/invalid JWT) |
+| **Response 403** | Forbidden (insufficient role) |
+| **Response 500** | Internal Server Error (database aggregation failure) |
+
+### `GET /admin/queue/dead-letters`
+| Field | Value |
+|---|---|
+| **Auth** | Bearer JWT |
+| **Roles** | `PLATFORM_ADMIN` |
+| **Description** | Inspect the Dead Letter Queue. Allows platform admins to review jobs that failed after exhausting all retries. |
+| **Query** | `cursor` (string), `limit` (number), `filter_notification_type` (e.g. SEND_PUSH), `filter_user_id` (string), `filter_created_after` (ISO-8601), `filter_created_before` (ISO-8601) |
+| **Sorting** | Default ordering is `updated_at` DESC (most recently failed first). |
+| **Pagination** | Standard cursor-based pagination model. |
+| **Response 200** | `{ "data": [{ "id": "string", "payload": object, "status": "DEAD_LETTER", "attempt_count": number, "last_error": "string", "ticket_ids": object, "idempotency_key": "string", "available_at": "string", "created_at": "string", "updated_at": "string" }], "pagination": { "next_cursor": "string", "has_more": boolean } }` |
+| **Response 401** | Unauthorized (missing/invalid JWT) |
+| **Response 403** | Forbidden (insufficient role) |
+| **Response 500** | Internal Server Error (database query failure) |
+
+### `POST /admin/queue/dead-letters/:id/replay`
+| Field | Value |
+|---|---|
+| **Auth** | Bearer JWT |
+| **Roles** | `PLATFORM_ADMIN` |
+| **Description** | Transactionally replays a dead-lettered job. Generates a canonical audit event. |
+| **Replay Semantics** | Modifies the row transactionally: <br> - `status` is reset from `DEAD_LETTER` to `PENDING`<br> - `attempt_count` is reset to `0`<br> - `last_error` is reset to `null`<br> - `ticket_ids` is reset to `null`<br> - `available_at` is set to `now()`<br> - `payload` and `idempotency_key` remain completely immutable. |
+| **Audit Logging** | Action: `QUEUE_JOB_REPLAY`, Entity: `NOTIFICATION_JOB`, Entity ID: `job.id`, Actor: `PLATFORM_ADMIN (user_id)`, Timestamp: `now()`, Metadata: `{ original_last_error: string }`, Result: `SUCCESS` |
+| **Response 200** | `{ "id": "string", "status": "PENDING" }` |
+| **Response 401** | Unauthorized (missing/invalid JWT) |
+| **Response 403** | Forbidden (insufficient role) |
+| **Response 404** | Not Found (job ID does not exist) |
+| **Response 422** | Unprocessable Entity (job is not in DEAD_LETTER state) |
+| **Response 500** | Internal Server Error (transaction failure) |
 
 ---
 

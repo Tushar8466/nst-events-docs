@@ -20,8 +20,8 @@ version: '3.9'
 
 services:
   postgres:
-    image: ghcr.io/tembo-io/tembo-local:latest   # PostgreSQL 16 + PostGIS + pgmq + pg_cron
-    # Alternative: build a custom image from postgis/postgis:16-3.4 + install pgmq
+    image: ghcr.io/tembo-io/tembo-local:latest   # PostgreSQL 16 + PostGIS + native queue + pg_cron
+    # Alternative: build a custom image from postgis/postgis:16-3.4 + install native queue
     environment:
       POSTGRES_USER: nst
       POSTGRES_PASSWORD: nst
@@ -40,9 +40,9 @@ volumes:
   postgres_data:
 ```
 
-> **Risk (from roadmap §Phase 0)**: pgmq Docker image availability varies. If a
-> pre-built image with pgmq is not available, build a custom image:
-> `FROM postgis/postgis:16-3.4` + compile pgmq from source. This must be
+> **Risk (from roadmap §Phase 0)**: native queue Docker image availability varies. If a
+> pre-built image with native queue is not available, build a custom image:
+> `FROM postgis/postgis:16-3.4` + compile native queue from source. This must be
 > resolved before Phase 1 can begin.
 
 **Phase 0 DoD**: `docker compose up -d` → PostgreSQL accepting connections on
@@ -118,7 +118,7 @@ kind: Deployment
 metadata:
   name: nst-worker
 spec:
-  replicas: 1          # Intentionally 1 — pgmq visibility timeout prevents duplicates
+  replicas: 1          # Intentionally 1 — native queue locked_at timeout prevents duplicates
   selector:
     matchLabels:
       app: nst-worker
@@ -248,7 +248,7 @@ jobs:
     services:
       postgres:
         image: postgis/postgis:16-3.4
-        # + pgmq setup for integration tests
+        # + native queue setup for integration tests
 ```
 
 **`.github/workflows/deploy.yml`** — Runs on merge to `main`:
@@ -295,7 +295,7 @@ explicit definitions of done for each phase.
 
 | Item | Detail |
 |---|---|
-| **Deliverables** | `schema.prisma` (all 19 tables, 15 enums, all relations); 10 raw SQL migrations (extensions, RLS, triggers, views, RPCs, MVs, search, pg_cron, pgmq); seed script with test data |
+| **Deliverables** | `schema.prisma` (all 19 tables, 15 enums, all relations); 10 raw SQL migrations (extensions, RLS, triggers, views, RPCs, MVs, search, pg_cron, native queue); seed script with test data |
 | **Dependencies** | Phase 0 complete; Docker Compose PG running |
 | **Senior-only items** | `withUserContext` impl; all RLS policies; soft-delete cascade triggers; audit triggers; `mark_attendance` RPC; `register_event` RPC |
 | **Junior-safe items** | Seed script; migration testing; `updated_at` trigger scaffolding |
@@ -377,7 +377,7 @@ explicit definitions of done for each phase.
 
 | Item | Detail |
 |---|---|
-| **Deliverables** | `GET /notifications`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all`; `GET/PATCH /notifications/preferences`; pgmq enqueueing from event approval/rejection RPCs |
+| **Deliverables** | `GET /notifications`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all`; `GET/PATCH /notifications/preferences`; native queue enqueueing from event approval/rejection RPCs |
 | **Dependencies** | Phase 4 (event state transitions trigger notifications) |
 
 ---
@@ -398,7 +398,7 @@ explicit definitions of done for each phase.
 
 | Item | Detail |
 |---|---|
-| **Deliverables** | `nst-worker` deployment; pgmq polling loop (5s, batch 100); Expo Push API; retry backoff (1m/5m/15m); DLQ after 3 failures; delivery write-back; `DeviceNotRegistered` hard-delete; `pg_cron` jobs: MV refresh (5 min), expired token cleanup, archived event transition |
+| **Deliverables** | `nst-worker` deployment; native queue polling loop (5s, batch 100); Expo Push API; retry backoff (1m/5m/15m); DLQ after 3 failures; delivery write-back; `DeviceNotRegistered` hard-delete; `pg_cron` jobs: MV refresh (5 min), expired token cleanup, archived event transition |
 | **Dependencies** | Phase 7 |
 | **Integration Checkpoint IC-6** | Push notifications arrive after event approval; inbox shows unread |
 
@@ -449,7 +449,7 @@ blocking severity.
 
 | Gap | Detail | Resolution Needed |
 |---|---|---|
-| **pgmq Docker image** | The documentation requires pgmq as a PostgreSQL extension but no specific Docker image is mandated. `postgis/postgis:16-3.4` does not include pgmq. Engineers need a ready-to-run local dev image before Phase 1 can begin | Team must decide: (A) Build custom Docker image with pgmq compiled from source, (B) Use a community image (e.g., Tembo's), or (C) Use Neon/Supabase-hosted PG for local dev with pgmq pre-installed |
+| **native queue Docker image** | The documentation requires native queue as a PostgreSQL extension but no specific Docker image is mandated. `postgis/postgis:16-3.4` does not include native queue. Engineers need a ready-to-run local dev image before Phase 1 can begin | Team must decide: (A) Build custom Docker image with native queue compiled from source, (B) Use a community image (e.g., Tembo's), or (C) Use Neon/Supabase-hosted PG for local dev with native queue pre-installed |
 | **Database Hosting Provider** | Flagged as "Under Review" in MASTER_CONTEXT.md. K8s manifests differ significantly between CNPG StatefulSet vs. external managed PostgreSQL | Needed before Phase 12. Does NOT block Phases 0–11 which use Docker Compose |
 | **Google OAuth Credentials** | `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` must be provisioned before Phase 2. Requires a Google Cloud project and OAuth 2.0 credential with correct redirect URIs | Needed before Phase 2 starts (≈Day 5–8) |
 | **CSRF on mobile** | `docs/api/12-api-freeze-v1.md` lists this as "Blocking for T-117 only." Mobile uses Bearer JWT (no cookie), so CSRF does not apply to mobile auth. However, the dashboard uses HttpOnly cookie — CSRF protection must be decided for dashboard-initiated requests | Architecture answer: SameSite=Strict on refresh cookie + `X-Requested-With` header check. Mobile exempt. Unblock T-117 with this decision |

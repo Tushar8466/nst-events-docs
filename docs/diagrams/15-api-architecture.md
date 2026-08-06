@@ -24,8 +24,8 @@ graph TD
     end
 
     subgraph Notification Worker Service
-        Worker["Background Worker (pgmq polling)"]
+        Worker["Background Worker (native queue polling)"]
     end
 
-    Worker -->|pgmq| Database
+    Worker -->|native queue| Database
 ```

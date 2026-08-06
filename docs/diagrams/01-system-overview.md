@@ -21,7 +21,7 @@ graph TD
         Backend["Backend API / Express Backend"]
         Database[("PostgreSQL Database")]
         Storage[("File Storage (Deferred — Not in V1)")]
-        Notifications["Notification Service / pgmq"]
+        Notifications["Notification Service / native queue"]
     end
 
     subgraph External Integrations

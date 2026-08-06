@@ -23,7 +23,7 @@ graph TD
     end
 
     subgraph Notification Worker Service
-        Worker["Background Worker (pgmq)"]
+        Worker["Background Worker (native queue)"]
     end
 
     subgraph Infrastructure
@@ -43,7 +43,7 @@ graph TD
     Routes --> RBAC
     RBAC --> DB
 
-    Worker -->|pgmq polling| DB
+    Worker -->|native queue polling| DB
 
     classDef app fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e;
     classDef pkg fill:#fef08a,stroke:#ca8a04,stroke-width:2px,color:#713f12;

@@ -19,7 +19,7 @@ To define the complete PostgreSQL database architecture for NST-Events, serving 
 * We use a unified generic `events` table with structured JSONB metadata.
 * Authorization is heavily tied to the `club_memberships` table mapping users to roles within specific contexts.
 * Real-time updates are pushed to clients via SSE (Server-Sent Events) from the Express backend — used for live attendance counts, waitlist position changes, and Operations Mode.
-* Intensive async tasks (notifications) use `pgmq` polled by an Express background worker.
+* Intensive async tasks (notifications) use `native queue` polled by an Express background worker.
 
 ## Schema Overview: Major Domains
 * **Users & Roles**: `users`, `club_memberships`

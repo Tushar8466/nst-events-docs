@@ -45,7 +45,7 @@ nst-events/
 *   **Import Rules**: MUST NOT import `@nst/mobile`, `@nst/dashboard`, or `@nst/worker`.
 
 ### `apps/worker`
-*   **Purpose**: Dedicated pgmq consumer. Polls `notifications` queue every 5s. Delivers Expo push notifications. Does NOT handle HTTP traffic (except `/health` for K8s).
+*   **Purpose**: Dedicated native queue consumer. Polls `notifications` queue every 5s. Delivers Expo push notifications. Does NOT handle HTTP traffic (except `/health` for K8s).
 *   **Owner**: Backend Team
 *   **Dependencies**: `@nst/database`, `@nst/shared`, `expo-server-sdk`, `node-fetch`.
 *   **Public API**: None (Internal process polling PostgreSQL).
@@ -216,8 +216,8 @@ apps/worker/
 ```
 
 ### Components
-*   **`consumers/`**: Logic to poll `pgmq`, process messages, handle retries, and write back delivery status.
-*   **`lib/queue.ts`**: Helper functions to execute `pgmq.read`, `pgmq.delete`, and `pgmq.archive` (DLQ) via `prisma.$queryRaw`.
+*   **`consumers/`**: Logic to poll `native queue`, process messages, handle retries, and write back delivery status.
+*   **`lib/queue.ts`**: Helper functions to execute `native queue.read`, `native queue.delete`, and `native queue.archive` (DLQ) via `prisma.$queryRaw`.
 *   **`lib/expo-push.ts`**: Expo Push API integration, including handling `DeviceNotRegistered` errors to hard-delete `push_tokens` rows.
 *   **`health.ts`**: Minimal HTTP server (e.g., Express) on port 3001 serving `GET /health` for K8s liveness probes.
 *   **`index.ts`**: Worker bootstrap loop initializing `setInterval` with `POLL_INTERVAL_MS`.
@@ -376,7 +376,7 @@ packages/database/
 │       ├── 0007_materialized_views/
 │       ├── 0008_search/
 │       ├── 0009_pgcron/
-│       └── 0010_pgmq_queues/
+│       └── 0010_native queue_queues/
 ├── src/
 │   ├── client.ts
 │   └── context.ts
@@ -386,7 +386,7 @@ packages/database/
 
 ### Components
 *   **`schema.prisma`**: Single source of truth for tables, enums, and basic relations.
-*   **`migrations/`**: Raw SQL logic bridging Prisma limitations. Required for PostGIS, pgmq, triggers, RLS, RPCs, MVs, FTS, and pg_cron.
+*   **`migrations/`**: Raw SQL logic bridging Prisma limitations. Required for PostGIS, native queue, triggers, RLS, RPCs, MVs, FTS, and pg_cron.
 *   **`seed.ts`**: Development data (Admin, clubs, events, users).
 *   **`src/context.ts`**: The `withUserContext(userId, fn)` transaction wrapper required to inject `app.user_id` for RLS.
 *   **`src/client.ts`**: PrismaClient singleton.
@@ -444,7 +444,7 @@ nst-events/
 ```
 
 ### Components
-*   **`docker-compose.yml`**: Local dev environment running PostgreSQL 16, PostGIS, pgmq, and pg_cron.
+*   **`docker-compose.yml`**: Local dev environment running PostgreSQL 16, PostGIS, native queue, and pg_cron.
 *   **`Dockerfile.api` / `Dockerfile.worker`**: Production multi-stage Docker builds.
 *   **`postgres-statefulset.yaml`**: 2-node CNPG PostgreSQL deployment suitable for the 8GB RAM NST cluster nodes.
 *   **`k8s/*.yaml`**: Day-0 manifests for NST Cluster deployment.
@@ -499,7 +499,7 @@ All items **MUST** exist before Phase 1 (Database Foundation) begins.
 *   [x] **[REQUIRED]** `apps/worker` containing polling loop structure and `/health` endpoint.
 *   [x] **[REQUIRED]** `apps/mobile` Expo project scaffolded with React Query and Zustand.
 *   [x] **[REQUIRED]** `apps/dashboard` Next.js project scaffolded with Radix UI and React Query.
-*   [x] **[REQUIRED]** `docker-compose.yml` running PostgreSQL with PostGIS + pgmq.
+*   [x] **[REQUIRED]** `docker-compose.yml` running PostgreSQL with PostGIS + native queue.
 *   [x] **[REQUIRED]** `.env.example` documenting all configuration keys.
 *   [x] **[REQUIRED]** `.github/workflows/ci.yml` testing pipeline.
 *   [ ] **[FUTURE]** Media storage integrations (e.g., S3 setup for image uploads) are explicitly deferred to post-V1.

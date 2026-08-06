@@ -86,14 +86,14 @@ nst-events/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   ├── worker/                           # nst-worker — pgmq notification worker
+│   ├── worker/                           # nst-worker — native queue notification worker
 │   │   ├── src/
 │   │   │   ├── index.ts                  # Polling loop bootstrap
 │   │   │   ├── consumers/
-│   │   │   │   └── notification.consumer.ts   # pgmq read → Expo Push API
+│   │   │   │   └── notification.consumer.ts   # native queue read → Expo Push API
 │   │   │   ├── lib/
 │   │   │   │   ├── expo-push.ts          # Expo Push API client
-│   │   │   │   └── queue.ts              # pgmq read/delete/archive helpers
+│   │   │   │   └── queue.ts              # native queue read/delete/archive helpers
 │   │   │   └── health.ts                 # HTTP /health for K8s liveness probe
 │   │   ├── package.json
 │   │   └── tsconfig.json
@@ -159,8 +159,8 @@ nst-events/
 │   │   │   │   │   └── migration.sql     # Generated tsvector columns + GIN indexes
 │   │   │   │   ├── 0009_pgcron/
 │   │   │   │   │   └── migration.sql     # MV refresh every 5min, token cleanup
-│   │   │   │   └── 0010_pgmq_queues/
-│   │   │   │       └── migration.sql     # SELECT pgmq.create('notifications')
+│   │   │   │   └── 0010_native queue_queues/
+│   │   │   │       └── migration.sql     # CREATE TABLE notification_jobs
 │   │   │   └── seed.ts                   # Development seed data
 │   │   ├── src/
 │   │   │   ├── client.ts                 # PrismaClient singleton export
@@ -194,7 +194,7 @@ nst-events/
 │       └── prettier.config.js
 │
 ├── docker/
-│   ├── docker-compose.yml                # Local dev: PostgreSQL 16 + pgmq + pg_cron
+│   ├── docker-compose.yml                # Local dev: PostgreSQL 16 + native queue + pg_cron
 │   ├── Dockerfile.api                    # Production image for nst-api
 │   └── Dockerfile.worker                 # Production image for nst-worker
 │
@@ -261,7 +261,7 @@ apps/dashboard      ──→  @nst/shared only
 
 | Field | Value |
 |---|---|
-| **Purpose** | Dedicated pgmq consumer. Polls `notifications` queue every 5 s (batch 100). Dispatches push notifications via Expo Push API. Does NOT serve HTTP traffic except `/health` |
+| **Purpose** | Dedicated native queue consumer. Polls `notifications` queue every 5 s (batch 100). Dispatches push notifications via Expo Push API. Does NOT serve HTTP traffic except `/health` |
 | **Runtime** | Node.js 20 LTS |
 | **Framework** | Plain TypeScript — no HTTP framework |
 | **Build command** | `pnpm --filter @nst/worker build` → `tsc -p tsconfig.json` |
@@ -270,7 +270,7 @@ apps/dashboard      ──→  @nst/shared only
 | **Health check** | `GET /health` on port `3001` — K8s liveness probe only |
 | **Dependencies** | `@nst/database`, `@nst/shared`, `expo-server-sdk`, `node-fetch` |
 | **Key env vars** | `DATABASE_URL`, `EXPO_ACCESS_TOKEN`, `POLL_INTERVAL_MS` (default 5000), `BATCH_SIZE` (default 100) |
-| **Replica constraint** | Intentionally 1. pgmq visibility timeout prevents duplicate processing |
+| **Replica constraint** | Intentionally 1. native queue locked_at timeout prevents duplicate processing |
 
 ---
 
@@ -385,7 +385,7 @@ apps/dashboard      ──→  @nst/shared only
 | **Required by** | ADR-001, MASTER_CONTEXT.md Architecture table, all database docs |
 | **Version** | Prisma 5.x |
 | **CLI usage** | `npx prisma migrate dev`, `npx prisma migrate deploy`, `npx prisma generate`, `npx prisma db seed` |
-| **Limitation** | Cannot manage: RLS policies, triggers, views, materialized views, stored procedures, pg_cron, pgmq — all require raw SQL migrations |
+| **Limitation** | Cannot manage: RLS policies, triggers, views, materialized views, stored procedures, pg_cron, native queue — all require raw SQL migrations |
 
 ### 4.5 ESLint
 
@@ -417,11 +417,11 @@ apps/dashboard      ──→  @nst/shared only
 
 | Field | Value |
 |---|---|
-| **Why** | Local development environment. Starts PostgreSQL 16 with PostGIS + pg_cron + pgmq in a single command |
+| **Why** | Local development environment. Starts PostgreSQL 16 with PostGIS + pg_cron + native queue in a single command |
 | **Config file** | `docker/docker-compose.yml` |
-| **Required by** | Phase 0 Prerequisites, Phase 0 Definition of Done: "`docker compose up` starts PG+pgmq" |
-| **Services** | `postgres` (PostgreSQL 16 + PostGIS + pgmq), `pgadmin` (optional, dev only) |
-| **Image** | `ghcr.io/pramsey/pg_featureserv` or `postgis/postgis:16-3.4` with pgmq extension added |
+| **Required by** | Phase 0 Prerequisites, Phase 0 Definition of Done: "`docker compose up` starts PG+native queue" |
+| **Services** | `postgres` (PostgreSQL 16 + PostGIS + native queue), `pgadmin` (optional, dev only) |
+| **Image** | `ghcr.io/pramsey/pg_featureserv` or `postgis/postgis:16-3.4` with native queue extension added |
 
 ### 4.9 GitHub Actions
 

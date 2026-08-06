@@ -26,7 +26,7 @@ graph TD
         Worker["Background Worker (nst-worker)"]
     end
 
-    Worker -->|pgmq polling| Database
+    Worker -->|native queue polling| Database
 ```
 
 ### 1. Express REST API
@@ -39,7 +39,7 @@ For complex atomic operations requiring lock-free atomic updates or multi-table 
 Tasks that require external integrations or compute (QR token generation, webhook delivery) run as Express route handlers within the Node.js process.
 
 ### 4. Background Worker (nst-worker)
-Heavy asynchronous tasks (like polling `pgmq` for notifications and calling the Expo Push API) are delegated to a separate Kubernetes Deployment (`nst-worker`) to avoid blocking the main API HTTP request loop.
+Heavy asynchronous tasks (like polling `native queue` for notifications and calling the Expo Push API) are delegated to a separate Kubernetes Deployment (`nst-worker`) to avoid blocking the main API HTTP request loop.
 
 ### 4. Storage Access (TBD)
 <!-- NEEDS REVIEW: Storage strategy TBD for V1. Options include Cloudflare R2, AWS S3, MinIO on NST Cluster, or deferring file uploads to V2. -->

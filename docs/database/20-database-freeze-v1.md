@@ -12,7 +12,7 @@ FROZEN
 ## Accepted Risks
 * Monolithic database structure (All domains in one database).
 * High reliance on PostGIS for core flow.
-* Express background worker must reliably poll `pgmq` and handle queue failures gracefully.
+* Express background worker must reliably poll `native queue` and handle queue failures gracefully.
 
 ## Known Tradeoffs
 * Soft deletes using views add slight overhead to basic `SELECT` queries.
