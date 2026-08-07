@@ -113,15 +113,15 @@
 
 ---
 
-## Phase 8: SSE (Server-Sent Events)
+## Phase 8: Registration Architecture & Server-Sent Events (SSE)
 
 | Field | Detail |
 |---|---|
-| **Prerequisites** | Phase 6 complete |
-| **Deliverables** | `GET /events/:id/live` streaming live attendance count, registration count, waitlist position, lock/unlock status; JWT auth on connection; 30s heartbeat; `Last-Event-ID` reconnection; connection cleanup; rate limit (max 3 SSE per user) |
-| **Definition of Done** | Clients receive updates within 2s; connections survive pod restarts via `Last-Event-ID`; connection pool bounded; authenticated only |
-| **Risks** | Open connections consume server resources; K3s load balancer timeout must accommodate long-lived connections; **cross-replica fan-out via PG LISTEN/NOTIFY is required for correctness in the 2–3 replica topology — this is a P1 deliverable (T-094), not an optional enhancement** |
-| **Dependencies** | Phase 6 |
+| **Prerequisites** | Phase 7 complete |
+| **Deliverables** | **Milestone 1 (Database Foundation)**: PostgreSQL RPCs (`register_event`, `create_team`, `join_team`, `leave_team`, `cancel_registration`), strict lock ordering, team lifecycle invariants, leader constraints, waitlist promotion.<br>**Milestone 2 (API Layer)**: Express routers/services for Registration and Teams, Zod validation, RBAC, Notification Producer idempotent enqueueing.<br>**Milestone 3 (Client UI & SSE Integration)**: Mobile Pessimistic Registration Flow (confirmation, loading, error toasts), Team UI, SSE Backend (`GET /events/:id/live`), and SSE Client Subscription (live `registration_count`, `waitlist_update`). |
+| **Definition of Done** | DB logic fully isolated in RPCs; API layer orchestrates without business logic; Mobile UI strictly follows pessimistic state updates; SSE streams live registration/waitlist updates under 2s latency. |
+| **Risks** | Open SSE connections consume server resources; Pessimistic UI states must correctly handle transient network failures. |
+| **Dependencies** | Phase 7 |
 
 ---
 

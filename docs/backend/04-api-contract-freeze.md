@@ -709,8 +709,31 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT (query param `token` for SSE) |
 | **Roles** | Any authenticated |
-| **Description** | Server-Sent Events stream |
-| **Events Emitted** | `attendance_count` (`{ count: number }`), `registration_count` (`{ count: number }`), `waitlist_update` (`{ user_id: string, status: string }`), `session_opened` (`{ session_id: string }`), `session_closed` (`{ session_id: string }`), `lock_status` (`{ is_locked: boolean }`), `heartbeat` (`{ timestamp: string }`) |
+| **Description** | Server-Sent Events stream. See canonical database transport contract: `docs/database/21-realtime-listen-notify-contract.md`. PostgreSQL LISTEN/NOTIFY is the canonical database transport. The Node LISTEN bridge translates PostgreSQL notifications into SSE. |
+| **Events Emitted** | `attendance_count`, `registration_count`, `waitlist_update`, `session_opened`, `session_closed`, `lock_status`, `heartbeat` |
 | **Headers** | `Content-Type: text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive` |
 | **Reconnection** | Client sends `Last-Event-ID` header; server resumes from that point |
 | **Rate Limit** | Max 3 concurrent SSE connections per user |
+
+#### SSE Connection Lifecycle & Retry Strategy (Client-Side)
+
+1. **Connection Creation**: Client initiates `EventSource` with `?token=JWT`.
+2. **Foreground/Background**: 
+   - **Background**: When the app moves to the background, the client MUST manually invoke `.close()` on the `EventSource` to preserve server connections and battery.
+   - **Foreground**: When the app returns to foreground, client creates a new `EventSource`, passing the last received `Last-Event-ID`.
+3. **Heartbeat**: Server sends `heartbeat` every 30s. If the client misses a heartbeat for 65s (timeout), it MUST manually `.close()` and attempt reconnect.
+4. **Retry & Exponential Backoff Algorithm**:
+   - **Initial retry**: 2000ms.
+   - **Algorithm**: `delay = min(initial_retry * (2 ^ attempt), max_delay) + jitter(0-1000ms)`.
+   - **Maximum retry delay**: 30000ms (30 seconds).
+   - **Maximum retries**: Infinite (keep trying while in foreground).
+   - **Reset conditions**: Retry count resets to 0 after receiving a successful `heartbeat` or other valid event.
+5. **Network Loss**: If the OS reports no network, pause reconnection attempts. Display an "Offline (Reconnecting...)" failure banner at the top of the UI. Resume retry algorithm upon network recovery.
+6. **Token Expiration**: If SSE drops with a 401 Unauthorized, client must pause reconnection, refresh the JWT via the `/auth/refresh` endpoint, and only then instantiate a new `EventSource`.
+7. **Application Restart**: Start a clean connection without `Last-Event-ID` if local cache was cleared, otherwise resume using cached ID.
+
+#### Realtime Events Handling (UI Mutation)
+- **`registration_count`**: Update the count integer directly on the event details screen. No toast. Producer: Postgres Trigger/RPC. Consumer: Mobile Event Screen.
+- **`waitlist_update`**: Update the specific user's waitlist badge dynamically. No toast. Producer: Postgres Trigger/RPC. Consumer: Mobile Event Screen.
+- **Ordering guarantees**: Handled by server via strictly monotonic `id` fields.
+- **Duplicate handling**: Client strictly ignores events where `event.id <= Last-Event-ID`.
