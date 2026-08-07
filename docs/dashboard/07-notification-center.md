@@ -9,7 +9,7 @@ Below is the exhaustive, single-source-of-truth definition for every notificatio
 ### 1. WAITLIST_PROMOTED
 * **Notification Type**: `WAITLIST_PROMOTED`
 * **Priority**: HIGH
-* **Producer**: `register_event` RPC (waitlist promotion logic)
+* **Producer**: Node.js Notification Producer Service (invoked by `DELETE /events/:id/register` or `DELETE /teams/:id/leave` API handlers after RPC returns promoted IDs)
 * **Consumer**: Promoted Student
 * **Title Template**: "You're off the waitlist!"
 * **Body Template**: "You have been promoted to a registered spot for {event_title}."

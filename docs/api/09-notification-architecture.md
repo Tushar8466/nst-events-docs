@@ -1,7 +1,7 @@
 # Notification Architecture
 
 ## Queue Flow
-1. **Trigger**: An RPC (e.g., `approve_event`) inserts a message into the native PostgreSQL `notification_jobs` table atomically within the same transaction.
+1. **Trigger**: The Node.js Notification Producer Service (invoked by API handlers after transactions commit) inserts a message into the `notifications` and `notification_jobs` tables atomically via a Prisma Interactive Transaction.
 2. **Poll**: The `nst-worker` Kubernetes Deployment polls the `notification_jobs` table every 5 seconds (batch of 100 messages) using `FOR UPDATE SKIP LOCKED`. See `docs/api/13-worker-deployment.md` for the full deployment model.
 3. **Delivery**: The worker calls the Expo Push API.
 4. **Finalization**: Success/Fail states are written back to the `notifications` and `notification_jobs` tables via Prisma.

@@ -9,8 +9,8 @@ erDiagram
     EVENTS ||--o{ ATTENDANCE_SESSIONS : contains
     EVENTS ||--o{ EVENT_REGISTRATIONS : has_individual
     EVENTS ||--o{ TEAMS : hosts
-    TEAMS ||--o{ TEAM_MEMBERS : includes
-    USERS ||--o{ TEAM_MEMBERS : forms
+    USERS ||--o{ EVENT_REGISTRATIONS : registers_for
+    TEAMS ||--o{ EVENT_REGISTRATIONS : includes_members
     USERS ||--o{ EVENT_REGISTRATIONS : books
     ATTENDANCE_SESSIONS ||--o{ ATTENDANCE_RECORDS : tracks
     USERS ||--o{ ATTENDANCE_RECORDS : marked_present

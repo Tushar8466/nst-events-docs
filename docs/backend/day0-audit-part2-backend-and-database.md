@@ -287,7 +287,7 @@ All RPCs are defined in SQL migration `0006_rpcs/migration.sql`.
 |---|---|---|
 | `register_event(event_id, user_id)` | Express | Lock-free atomic increment on `events.registration_count` vs `max_capacity`; insert or waitlist |
 | `create_team(event_id, user_id, team_name)` | Express | Atomic team + leader registration |
-| `join_team(team_id, user_id)` | Express | Check team size from `events.metadata.team_size_max` |
+| `join_team(team_id, user_id)` | DB RPC | Check team size transactionally via `events.metadata->>'team_size_max'` (Express performs optimistic pre-validation only) |
 | `leave_team(team_id, user_id)` | Express | Transfer leadership if leader leaves |
 | `process_waitlist(event_id)` | Express | Promote first WAITLISTED → REGISTERED; notify |
 | `submit_event_for_approval(event_id, user_id)` | Express | DRAFT → PENDING_APPROVAL; enqueue notification to Faculty |

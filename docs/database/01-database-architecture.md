@@ -25,7 +25,7 @@ To define the complete PostgreSQL database architecture for NST-Events, serving 
 * **Users & Roles**: `users`, `club_memberships`
 * **Clubs**: `clubs`
 * **Events**: `events`, `event_clubs` — approval lifecycle tracked via `events.state` + `audit_logs`; no separate approvals table
-* **Registrations & Event Results (Competition Outcomes)**: `event_registrations`, `teams`, `team_members`, `event_results`
+* **Registrations & Event Results (Competition Outcomes)**: `event_registrations`, `teams`, `event_results`
 * **Attendance**: `attendance_sessions`, `attendance_records`, `attendance_disputes`
 * **Notifications**: `notifications`, `notification_preferences`, `push_tokens`
 * **Analytics & Gamification**: `club_leaderboard_mv` and `student_leaderboard_mv` as materialized views

@@ -58,7 +58,7 @@
   * `audit_metadata` (`JSONB` - Stores device_os, gps_accuracy, mock_location_detected, app_version)
 
 ## `event_registrations`
-* **Purpose**: Tracks intent to attend (individual or team). Replaces `team_members` entirely.
+* **Purpose**: Tracks intent to attend (individual or team). Acts as the canonical source of truth for all event registrations and team membership.
 * **Primary Key**: `id UUID`
 * **Foreign Keys**: `event_id`, `user_id`, `team_id`
 * **Indexes**: Composite `(event_id, user_id)` (UNIQUE), `(team_id, event_id)` (B-Tree)

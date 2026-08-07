@@ -10,8 +10,8 @@ erDiagram
     EVENTS ||--o{ EVENT_SESSIONS : contains
     EVENTS ||--o{ EVENT_REGISTRATIONS : has
     EVENTS ||--o{ TEAMS : has
-    TEAMS ||--o{ TEAM_MEMBERS : includes
-    USERS ||--o{ TEAM_MEMBERS : part_of
+    USERS ||--o{ EVENT_REGISTRATIONS : registers_for
+    TEAMS ||--o{ EVENT_REGISTRATIONS : includes_members
     USERS ||--o{ EVENT_REGISTRATIONS : registers
     EVENT_SESSIONS ||--o{ ATTENDANCE_RECORDS : tracked_in
     USERS ||--o{ ATTENDANCE_RECORDS : marks
@@ -64,8 +64,7 @@ erDiagram
 ### Registration & Teams
 * **`teams`**: For team-based hackathons or competitions.
   * Columns: `id` (PK, UUID), `event_id` (FK), `name`, `leader_id` (FK to users), `created_at`.
-* **`team_members`**:
-  * Columns: `team_id` (FK), `user_id` (FK), `joined_at`.
+
 * **`event_registrations`**: Individual or team registrations for an event.
   * Columns: `id` (PK, UUID), `event_id` (FK), `user_id` (FK), `team_id` (FK, Nullable), `registered_at`.
 
@@ -97,7 +96,7 @@ erDiagram
 * **Unique Memberships**: `UNIQUE (club_id, user_id)` on `club_memberships`.
 * **Unique Event Registrations**: `UNIQUE (event_id, user_id)` on `event_registrations`.
 * **Unique Session Attendance**: `UNIQUE (session_id, user_id)` on `attendance_records` to prevent double counting.
-* **Team Integrity**: `team_members` can only reference users who have an active `event_registrations` row for the parent event (enforced via database triggers).
+* **Team Integrity**: Team membership is represented directly by active `event_registrations` through `team_id`. No separate membership table or database triggers are required.
 
 ## 6. Indexes
 * **Foreign Keys**: B-Tree indexes on every `_id` column (e.g., `user_id`, `event_id`, `club_id`) to optimize JOINs.

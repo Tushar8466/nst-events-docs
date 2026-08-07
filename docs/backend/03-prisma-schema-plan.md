@@ -155,7 +155,7 @@ Prisma manages table structures, enums, relations, and basic indexes. Everything
 
 | Attribute | Detail |
 |---|---|
-| **Purpose** | Tracks intent to attend (individual or team). Replaces `team_members` entirely. |
+| **Purpose** | Tracks intent to attend (individual or team). Acts as the canonical source of truth for all event registrations and team membership. |
 | **Primary Key** | `id UUID` |
 | **Key Columns** | `event_id UUID FK→events NOT NULL`, `user_id UUID FK→users NOT NULL`, `team_id UUID NULL`, `registration_status registration_status_enum NOT NULL DEFAULT 'REGISTERED'`, `participation_role participation_role_enum NOT NULL DEFAULT 'ATTENDEE'`, `registered_at TIMESTAMPTZ DEFAULT now()` |
 | **Soft Delete** | `deleted_at TIMESTAMPTZ NULL` |

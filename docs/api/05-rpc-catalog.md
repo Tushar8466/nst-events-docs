@@ -4,62 +4,99 @@
 
 ---
 
+## Canonical Global Lock Ordering
+
+> **Mandatory Rule**: All RPCs MUST acquire locks in the exact global order to prevent deadlocks:
+> 1. Event row
+> 2. Team row (if applicable)
+> 3. Registration rows
+> 4. Waitlist rows
+
+---
+
 ## `register_event(p_event_id)`
 
 * **Purpose**: Registers a user for an individual event.
 * **Inputs**: `p_event_id`
 * **Outputs**: `registration_id`, `status` (`REGISTERED` or `WAITLISTED`)
 * **Permissions**: Any authenticated student.
-* **Transaction Requirements**: Uses lock-free atomic increment (`UPDATE events SET registration_count = registration_count + 1 WHERE id = p_event_id AND (max_capacity IS NULL OR registration_count < max_capacity) RETURNING registration_count`). Checks `max_capacity` against `registration_count`. If capacity available (1 row returned): inserts with `REGISTERED`. If full (0 rows returned): inserts with `WAITLISTED` without incrementing count. Entire operation is atomic.
-* **Tables Touched**: `events` (lock + update `registration_count`), `event_registrations` (insert).
+* **Transaction Timeline**:
+  1. `BEGIN`
+  2. Execute Lock-Free Atomic Increment (`UPDATE events SET registration_count = registration_count + 1 WHERE ... RETURNING`)
+  3. Validate registration constraints (already registered?, is published?)
+  4. Allocate seat (if `registration_count < max_capacity`) OR waitlist
+  5. Insert registration
+  6. Update `registration_count` (if seat allocated)
+  7. `COMMIT`
+* Note: Notification Producer is invoked by the API layer post-commit if applicable.
 
-## `create_team(p_event_id, p_team_name)`
-* **Purpose**: Creates a team for a hackathon and sets the caller as leader.
-* **Inputs**: `p_event_id`, `p_team_name`
-* **Outputs**: `team_id`
-* **Permissions**: Authenticated student.
-* **Tables Touched**: `events`, `teams`, `team_members`.
+## `cancel_registration(p_event_id, p_user_id)`
 
-## `approve_event`
-* **Caller**: Faculty Mentor, Faculty Admin, Platform Admin
-* **Input**: `event_id`
-* **Behavior**: Transitions event status from `PENDING_APPROVAL` to `PUBLISHED`. Triggers push notifications to eligible students.
-* **Security**: Faculty Mentor must be mentor of a club attached to the event.
+* **Purpose**: Soft deletes a registration and processes waitlist promotion.
+* **Inputs**: `p_event_id`, `p_user_id`
+* **Outputs**: Array of `promoted_user_ids`
+* **Permissions**: Any authenticated student (own registration) or admin.
+* **Transaction Timeline**:
+  1. `BEGIN`
+  2. Lock event (`FOR UPDATE`)
+  3. Soft-delete registration
+  4. Invoke `process_waitlist` internal RPC
+  5. If `process_waitlist` returns 0 promoted users, decrement `events.registration_count` by 1
+  6. `COMMIT`
+* Note: API handler uses returned `promoted_user_ids` to invoke Notification Producer.
 
-## `mark_attendance(p_session_id, p_totp, p_lat, p_lng, p_device_id, p_device_os, p_gps_accuracy, p_mock_location_detected, p_app_version)`
-* **Purpose**: Validates physical presence, issues points, and handles fraud detection.
-* **Inputs**: Session ID, QR TOTP signature, user GPS coords, device forensic data.
-* **Outputs**: `attendance_records` table row (per ADR-005 revision). Express derives API response using `SCORE_RULES.ATTENDANCE`.
-* **Permissions**: Authenticated student.
-* **Tables Touched**: `attendance_records`, `leaderboard_scores`, `audit_logs`.
-* **Behavior**:
-  1. Geofence validation (PostGIS `ST_DWithin`).
-  2. TOTP validation using `ATTENDANCE_QR_SECRET` allowing ± 1 window drift (per ADR-005).
-  3. Reject mock locations (HTTP 422 mapping).
-  3. **Device Collision Check**:
-     * Query `attendance_records` where: `session_id` = input `session_id` AND `audit_metadata->>'device_id'` = input `device_id` AND `user_id` != input `user_id`.
-     * If result count > 0:
-       * Proceed with attendance write (do not reject).
-       * Set `audit_metadata.device_collision_detected = true` (an immutable audit fact).
-       * Insert into `audit_logs`: action: `ATTENDANCE_DEVICE_COLLISION`, `session_id`: input `session_id`, `flagged_user_id`: input `user_id`, `colliding_user_id`: the `user_id` found in collision query, `device_id`: input `device_id`.
-
-## `sync_offline_attendance(p_records)`
-* **Purpose**: Batch process offline attendance records from organizer devices.
-* **Inputs**: JSONB array of attendance payloads containing `session_id`, `user_id`, `scanned_token`, `scan_timestamp`, `device_id`, `gps_lat`, `gps_lng`, `offline_seq`.
-* **Outputs**: JSONB object summarizing processed counts, skips, and errors.
-* **Permissions**: `SECURITY DEFINER`. Route-level RBAC restricts to `CLUB_ADMIN` / `CORE_MEMBER`.
-* **Behavior**: Bypasses TOTP timeframe validation due to offline status, but retains geofence validation. Generates a master `ATTENDANCE_OFFLINE_SYNC` audit log for the entire batch.
-
-
-## `process_waitlist(p_event_id)`
-* **Purpose**: Moves waitlisted users to registered if capacity frees up.
-* **Execution**: `SECURITY DEFINER` — runs as DB owner, bypasses RLS on `event_registrations`.
-* **⚠️ Precondition**: Must be called inside `withUserContext(userId, ...)`. `current_user_id()` must resolve to the actor performing the cancellation (or the system actor if called from a trigger). If called outside `withUserContext`, the audit log will record a `NULL` actor_id, which is a bug.
-* **Caller**: Called internally by `delete_registration` flow after a cancellation. Not called directly by clients.
+## `process_waitlist(p_event_id)` (Internal)
+* **Purpose**: FIFO promotion of waitlisted members.
+* **Transaction Timeline**:
+  1. Select oldest active `WAITLISTED` registration `FOR UPDATE SKIP LOCKED`
+  2. **CRITICAL**: Ignore any registration where `team_id` is NOT NULL and the referenced team is soft-deleted.
+  3. Promote to `REGISTERED`
+  4. Return `promoted_user_ids`
 
 ### `assign_participation_role`
 * **Purpose**: Upgrades a user's role from ATTENDEE to VOLUNTEER, ORGANIZER, etc.
 * **Security**: Only callable by Club Admin, Faculty Mentor, Faculty Admin, Platform Admin.
+
+### `create_team(p_event_id, p_team_name)`
+* **Purpose**: Initializes a new team for a group-based event.
+* **Transaction Timeline**:
+  1. `BEGIN`
+  2. Lock event (`FOR UPDATE`)
+  3. Validate:
+     - state = 'PUBLISHED'
+     - registration_type = 'TEAM'
+     - registration_count < max_capacity
+  4. Insert team and creator as team lead
+  5. `COMMIT`
+
+### `join_team(p_event_id, p_team_id)`
+* **Purpose**: Adds user to an existing team.
+* **Transaction Timeline**:
+  1. `BEGIN`
+  2. Lock event (`FOR UPDATE`)
+  3. Lock team (`FOR UPDATE`)
+  4. Validate:
+     - state = 'PUBLISHED'
+     - registration_type = 'TEAM'
+     - registration_count < max_capacity
+     - active team members < events.metadata->>'team_size_max'
+     - user is not already registered
+  5. Insert registration
+  6. `COMMIT`
+
+### `leave_team(p_event_id, p_team_id)`
+* **Purpose**: Removes user from a team.
+* **Transaction Timeline**:
+  1. `BEGIN`
+  2. Lock event (`FOR UPDATE`)
+  3. Lock team (`FOR UPDATE`)
+  4. Soft-delete user's registration
+  5. If user was leader:
+     - Find oldest active `REGISTERED` member. (`WAITLISTED` are NEVER eligible)
+     - If found: Update team `leader_id` to this member.
+     - If NOT found: Soft-delete team AND soft-delete all remaining `WAITLISTED` registrations referencing this team.
+  6. Invoke `process_waitlist` (if user was `REGISTERED`)
+  7. `COMMIT`
 
 ### `submit_competition_result`
 * **Purpose**: Records a verified placement (e.g., WINNER) in the `event_results` table.

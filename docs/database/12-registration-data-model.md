@@ -1,14 +1,30 @@
 # Registration Data Model
 
 ## Architecture
-Handles both individuals and teams efficiently.
+`event_registrations` is the canonical source of truth for registration state and team membership.
 
-* **`event_registrations`**: Connects `user_id` to `event_id`.
+* **`event_registrations`**: Connects `user_id` to `event_id` and represents team membership via nullable `team_id`.
 * **`teams`**: Represents a grouped entity with a `leader_id`.
-* **`team_members`**: Connects `user_id` to `team_id`.
+
+## Team Leader Invariant
+- A team always has exactly one leader.
+- `leader_id` references an active (`deleted_at IS NULL`) registration belonging to the same team.
+- The leader MUST have `registration_status = 'REGISTERED'`.
+- A `WAITLISTED` registration can never become leader.
+
+## Team Dissolution
+If no `REGISTERED` members remain after the leader leaves:
+- The team is soft-deleted.
+- Every remaining `WAITLISTED` registration referencing that team is soft-deleted.
+- `process_waitlist` must ignore registrations belonging to deleted teams.
+
+## Registration–Team Invariant
+For every active registration:
+- if `team_id IS NOT NULL`, the referenced team MUST exist.
+- if a team exists, it MUST have at least one active registration.
 
 ## Individual vs Team Registration
-If an event is a Hackathon, users create a `teams` record first, then they are inserted into `team_members`. The `event_registration` row contains a non-null `team_id`. For individual registrations, `team_id` is null.
+If an event allows teams, users create a `teams` record first, then their `event_registrations` row contains a non-null `team_id`. For individual registrations, `team_id` is null.
 
 ## Capacity Management & Waitlists
 The `events` table contains `max_capacity` (nullable INTEGER; `NULL` means unlimited) and `registration_count` (INTEGER, default 0). When a student registers:

@@ -344,7 +344,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Own registration |
-| **Description** | Cancel registration. Triggers waitlist promotion. |
+| **Description** | Cancel registration. Begins Prisma Interactive Transaction. Calls `cancel_registration` RPC. API handler routes returned `promoted_user_ids` to the Notification Producer Service. |
 | **Response 204** | `{}` |
 
 ### `POST /events/:id/teams`
@@ -353,6 +353,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated (team-based events only) |
 | **Request** | `{ team_name: string }` |
+| **Description** | Calls `create_team` RPC. |
 | **Response 201** | `{ team_id, name, leader_id }` |
 
 ### `POST /teams/:id/join`
@@ -360,7 +361,8 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Any authenticated |
-| **Response 200** | `{ "success": true }` |
+| **Description** | Calls `join_team` RPC. Checks event `registration_count` against `max_capacity`. Teams may become partially registered. |
+| **Response 201** | `{ registration_id, status: "REGISTERED" | "WAITLISTED" }` |
 | **Response 422** | Team full (per event metadata team_size_max) |
 
 ### `DELETE /teams/:id/leave`
@@ -368,22 +370,7 @@ GET /v1/events?filter_state=PUBLISHED&filter_event_type=HACKATHON&filter_club_id
 |---|---|
 | **Auth** | Bearer JWT |
 | **Roles** | Team member (self) |
-| **Response 204** | `{}` |
-
-
-### `PATCH /teams/:id`
-| Field | Value |
-|---|---|
-| **Auth** | Bearer JWT |
-| **Roles** | Team Leader |
-| **Request** | `{ "name"?: "string", "leader_id"?: "string" }` |
-| **Response 200** | `{ "id": "string", "name": "string", "leader_id": "string" }` |
-
-### `DELETE /teams/:id/members/:userId`
-| Field | Value |
-|---|---|
-| **Auth** | Bearer JWT |
-| **Roles** | Team Leader |
+| **Description** | Calls `leave_team` RPC. Automatically transfers leadership if the leader leaves. Returns `promoted_user_ids` for the API handler to route to the Notification Producer. |
 | **Response 204** | `{}` |
 
 ### `GET /events/:id/registrations`

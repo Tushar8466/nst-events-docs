@@ -70,7 +70,7 @@
 | Field | Detail |
 |---|---|
 | **Prerequisites** | Phase 4 complete |
-| **Deliverables** | RPCs: `register_event` (lock-free atomic increment), `create_team`, `join_team`, `leave_team`, `process_waitlist`; route handlers: `POST /events/:id/register`, `POST /events/:id/teams`, `POST /teams/:id/join`, `DELETE /teams/:id/leave`, `GET /events/:id/registrations`, `GET /users/me/registrations`; waitlist auto-promote; RLS for event_registrations, teams, team_members |
+| **Deliverables** | RPCs: `register_event` (lock-free atomic increment), `create_team`, `join_team`, `leave_team`, `process_waitlist`; route handlers: `POST /events/:id/register`, `POST /events/:id/teams`, `POST /teams/:id/join`, `DELETE /teams/:id/leave`, `GET /events/:id/registrations`, `GET /users/me/registrations`; waitlist auto-promote; RLS for event_registrations, teams |
 | **Definition of Done** | 500+ concurrent registrations don't oversell capacity; waitlist promoted FIFO; team size constraints from event metadata; team leader transfer on leave; lock-free atomic increment verified under load |
 | **Risks** | Race conditions in team join/leave; waitlist promotion must be atomic |
 | **Dependencies** | Phase 4 |
