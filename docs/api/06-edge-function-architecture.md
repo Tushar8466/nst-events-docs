@@ -26,6 +26,6 @@ All such operations are gated behind Express route handlers.
 
 ## Queue Consumer (nst-worker)
 
-The `native queue` queue consumer runs as a **separate Kubernetes Deployment** (`nst-worker`), not inside the API process. See [13-worker-deployment.md](https://github.com/sohamdhande/nst-events/tree/main/docs/api) for the full deployment model, retry strategy, and failure handling.
+The `native queue` queue consumer runs as a **separate Kubernetes Deployment** (`nst-worker`), not inside the API process. See [13-worker-deployment.md](.) for the full deployment model, retry strategy, and failure handling.
 
 The API process (`nst-api`) only **enqueues** messages via RPCs. It never polls the queue.
