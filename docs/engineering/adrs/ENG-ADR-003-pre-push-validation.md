@@ -21,7 +21,7 @@ Accepted
 While pre-commit hooks catch styling and basic linting issues, deeper invariant violations (such as committing plain-text secrets, violating architectural import boundaries, or failing the test suite) can still be accidentally pushed to the remote repository if validation is bypassed or skipped during the commit phase.
 
 ## Decision
-We mandate a hard boundary at the Git Push lifecycle event. A Pre-Push execution hook must be configured to run the complete Tier A Quality Gate suite. 
+We mandate a hard boundary at the Git Push lifecycle event. A Husky Pre-Push execution hook must be configured to run the canonical `pnpm validate:local` command, representing the complete Tier A Quality Gate suite.
 
 If this suite fails, the push is aborted locally, and the code never touches the network.
 

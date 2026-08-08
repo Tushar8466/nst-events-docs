@@ -48,7 +48,7 @@ Before committing, the developer triggers local Validation gates ([ENG-004](./03
 The code is committed using the enforced Conventional Commits standard.
 
 ### 4. Pre-Push Execution
-Upon initiating a push to the remote, automated pre-push hooks execute. This stage enforces immutable Repository Invariants, ensuring no placeholder logic or obvious violations enter the remote repository. If this Gate fails, the push is rejected locally.
+Upon initiating a push to the remote, an automated Husky pre-push hook executes. This stage runs the canonical `pnpm validate:local` command which enforces immutable Repository Invariants (lint and typecheck), ensuring no placeholder logic or obvious violations enter the remote repository. If this Gate fails, the hook exits non-zero and the push is rejected locally.
 
 ### 5. Remote Sync
 The feature branch is synced to the remote repository.

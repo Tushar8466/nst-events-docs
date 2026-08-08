@@ -64,7 +64,7 @@ The officially supported development environments are **macOS** and **Linux**. W
 
 | Domain | Authorized Tool | Notes |
 |--------|-----------------|-------|
-| Git Hooks | **Husky** / **Lefthook** | Enforces Tier A local Quality Gates. |
+| Git Hooks | **Husky** | Auto-installed via `prepare` script. Enforces Tier A local Quality Gates. |
 | CI/CD Pipeline | **GitHub Actions** | Enforces Tier B remote Quality Gates. |
 
 ## 5. Infrastructure & Deployment

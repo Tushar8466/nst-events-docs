@@ -39,10 +39,10 @@ NST Events employs a bifurcated approach to Quality Gates to maintain high devel
 
 ### Tier A (Local) Gates
 
-Tier A Gates execute on the developer's local machine via pre-commit or pre-push hooks.
+Tier A Gates execute on the developer's local machine via the Husky pre-push hook invoking the canonical `pnpm validate:local` command.
 
 * **Velocity Rule**: Tier A must complete execution within approximately 2–3 minutes.
-* **Prohibited Constraints**: Do NOT put container builds, full integration test suites, or heavy database migrations inside local quality gates.
+* **Prohibited Constraints**: Do NOT put container builds, full integration test suites (e.g., `test:e2e`), or heavy database migrations inside local quality gates.
 * **Scope**: 
   - Code formatting validation.
   - Strict linting.
@@ -50,11 +50,11 @@ Tier A Gates execute on the developer's local machine via pre-commit or pre-push
   - Fast, isolated unit tests.
   - Secret scanning (local pass).
 
-If Tier A fails, the commit or push is aborted.
+If Tier A fails, the pre-push hook exits non-zero and the push is aborted.
 
 ### Tier B (Remote) Gates
 
-Tier B Gates execute on the remote CI server triggered by pull requests or pushes to integration branches.
+Tier B Gates execute on the remote CI server triggered by pull requests or pushes to integration branches. They orchestrate infrastructure setup before invoking the canonical `pnpm validate:ci` command.
 
 * **Velocity Rule**: Tier B favors comprehensiveness over speed. It may take considerably longer than Tier A.
 * **Scope**:
