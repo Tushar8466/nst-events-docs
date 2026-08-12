@@ -1,5 +1,8 @@
 # Motion System
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Philosophy
 Motion must be purposeful, rapid, and physically accurate.
 

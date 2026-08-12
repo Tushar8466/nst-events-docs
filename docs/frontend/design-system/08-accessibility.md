@@ -1,5 +1,8 @@
 # Accessibility
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Minimum Standard
 NST-Events enforces WCAG 2.1 AA as the absolute minimum standard across all interfaces.
 

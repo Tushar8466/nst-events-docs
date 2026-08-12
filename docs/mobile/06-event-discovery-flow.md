@@ -1,5 +1,8 @@
 # Event Discovery Flow
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Entry Points
 * **Campus Tab**: General feed of all `PUBLISHED` events.
 * **Club Profiles**: Filtering events hosted by specific clubs.

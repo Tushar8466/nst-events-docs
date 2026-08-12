@@ -1,5 +1,8 @@
 # Information Architecture
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Top-Level Domains
 
 ### 1. Home

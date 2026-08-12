@@ -1,5 +1,8 @@
 # Component Variants
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Visual Variants (Buttons/Badges)
 * **Primary**: Core actions. Uses `primary-base`.
 * **Secondary**: Neutral actions. Uses `secondary-base`.

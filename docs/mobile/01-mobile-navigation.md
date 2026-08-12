@@ -1,5 +1,8 @@
 # Mobile Navigation Architecture
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Overview
 The NST-Events mobile app employs a fluid, context-aware navigation structure optimized for high-speed engagement and task completion. 
 

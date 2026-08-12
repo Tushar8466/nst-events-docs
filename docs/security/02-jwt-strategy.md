@@ -123,3 +123,11 @@ Because roles are resolved live from `club_memberships` on every API request (no
 - **SHA-256 hash storage**: Database breach does not expose raw refresh tokens.
 - **Token rotation with Family Revocation**: Replay attacks using a stolen refresh token are detected. If the attacker uses a stolen token, the next refresh will trigger a family-wide revocation, immediately killing the session for both the attacker and the victim.
 - **Short access token TTL (15 min)**: Limits damage window from JWT theft.
+
+---
+
+## Hostile JWT Defenses
+As of Phase 18, rigorous defenses against hostile JWT manipulation are in place:
+- **Algorithm Confusion**: The JWT verification strategy explicitly enforces RS256 and rejects 'none' or symmetric 'HS256' algorithms signed with public keys.
+- **Signature Manipulation**: Malformed, truncated, or tampered signatures are caught immediately, resulting in 401 Unauthorized without further processing.
+- **Expired Tokens**: Standard JWT `exp` checks are strictly enforced. Requests with expired tokens trigger an automated client-side refresh workflow.

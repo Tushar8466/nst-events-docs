@@ -1,5 +1,8 @@
 # Attendance Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## LocationValidationIndicator
 * **Purpose**: Shows whether the user's GPS is within the PostGIS geofence radius.
 

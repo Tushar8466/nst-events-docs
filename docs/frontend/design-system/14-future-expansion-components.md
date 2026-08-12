@@ -1,5 +1,8 @@
 # Future Expansion Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 The component architecture is designed to support future modules seamlessly.
 
 ## Certificates

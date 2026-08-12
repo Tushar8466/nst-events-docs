@@ -1,5 +1,8 @@
 # Notification Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Toast
 * **Purpose**: Ephemeral, non-critical success/error messages.
 

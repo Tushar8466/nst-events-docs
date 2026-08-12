@@ -65,3 +65,9 @@ Utilizes the STRIDE methodology.
 
 **Classification**: DETECTABLE, NOT FULLY PREVENTABLE
 **Priority**: P0 — implement in `mark_attendance` RPC
+
+
+## Additional Defenses (Phase 18/19)
+- **Rate Limiting (Composite Keys)**: Rate limiters use composite keys combining IP and user context to prevent distributed brute-force or denial of service attacks without overly penalizing shared campus IPs.
+- **Dynamic QR Verification (HMAC)**: QR codes for attendance are cryptographically signed using a per-session HMAC secret. This guarantees that check-ins originate from live, legitimate dynamic QR codes, preventing replay attacks and screenshot sharing.
+

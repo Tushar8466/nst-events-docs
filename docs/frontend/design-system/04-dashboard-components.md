@@ -1,5 +1,8 @@
 # Dashboard Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 Built exclusively using Next.js and Tailwind CSS.
 
 ## Navigation & Structure

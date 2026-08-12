@@ -1,5 +1,8 @@
 # Profile Architecture
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Profile Governance Rule
 The Profile tab is strictly governed. It contains the **Personal Record**.
 It must never contain shared community data.

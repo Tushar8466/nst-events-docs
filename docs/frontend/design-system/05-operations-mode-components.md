@@ -1,5 +1,8 @@
 # Operations Mode Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 Components designed for the `Live Event Execution` environment.
 
 ## LiveScannerOverlay

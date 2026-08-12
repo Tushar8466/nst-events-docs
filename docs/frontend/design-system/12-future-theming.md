@@ -1,5 +1,8 @@
 # Future Theming
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Multi-Campus Support
 NST-Events is architected for future multi-campus deployments. 
 

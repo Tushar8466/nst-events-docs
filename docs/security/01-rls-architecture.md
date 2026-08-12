@@ -73,7 +73,7 @@ CREATE OR REPLACE FUNCTION upsert_oauth_user(p_google_sub TEXT, p_email TEXT, p_
 RETURNS SETOF users
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, pg_catalog
 AS $$
 BEGIN
   RETURN QUERY
@@ -89,6 +89,13 @@ END;
 $$;
 ```
 This function hardcodes defaults (like `global_role`) and prevents updates to restricted fields like `deleted_at`, ensuring the privilege elevation cannot be abused.
+
+## Worker Isolation (`nst_worker`)
+
+Background queue workers run under a dedicated `nst_worker` role. This role operates outside of standard RLS user contexts but is rigidly constrained:
+- It has explicit `GRANT` access only to tables required for its specific jobs (e.g., `notification_jobs`, `push_tokens`, `notifications`).
+- RLS policies for `nst_worker` explicitly permit only what it needs, bypassing the user-based identity checks safely.
+- It cannot read PII in `users` or write to core application tables, establishing a strict trust boundary.
 
 ## Trust Model
 We operate on a **Zero Trust** internal model. An authenticated JWT proves *identity*. *Authorization* is derived from relational data (`club_memberships`) evaluated at query time — not stored in JWT claims.

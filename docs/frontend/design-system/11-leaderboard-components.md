@@ -1,5 +1,8 @@
 # Leaderboard Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 Reflecting ADR-997 Merit-Based Leaderboard.
 
 ## TopPerformerCard

@@ -1,5 +1,8 @@
 # Home Priority System
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## The Priority Ladder
 The Home tab evaluates context based on a strict 5-tier priority hierarchy. Higher priorities entirely suppress lower priorities for the dominant top-screen widget.
 

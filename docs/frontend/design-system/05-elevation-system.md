@@ -1,5 +1,8 @@
 # Elevation System
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Core Rule: Borders Over Shadows
 We explicitly reject heavy, Material Design-style drop shadows. Elevation and hierarchy are established using **surface contrast** and **subtle borders**.
 

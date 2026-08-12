@@ -1,5 +1,8 @@
 # Design Tokens
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 The following represents the engineering specification for Tailwind/NativeWind configuration.
 
 ## Colors

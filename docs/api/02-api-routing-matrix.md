@@ -18,3 +18,10 @@ All operations are handled by the **Express backend**. Clients never call the da
 | Assign Club Admin | PostgreSQL RPC | High-privilege role escalation | `PLATFORM_ADMIN` via RBAC |
 | Create Club | PostgreSQL RPC | Complex setup (memberships, roles, audit) | `PLATFORM_ADMIN` via RBAC |
 | Archive Event | PostgreSQL RPC | State machine transition | Club Admin, Faculty Mentor, Faculty Admin, Platform Admin via RBAC |
+
+
+## Current API (Phase 20)
+| Method | Path | Auth | Role | Request | Response | Status Codes | Notes |
+|--------|------|------|------|---------|----------|--------------|-------|
+| GET | `/v1/events/:id/my-registration` | Required | Any | None | Registration Status | 200, 401, 404 | Retrieves the current user's registration status for a specific event. |
+

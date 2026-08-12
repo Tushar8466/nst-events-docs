@@ -1,5 +1,8 @@
 # Navigation Philosophy
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Core Principles
 1. **Speed & Reliability**: The UI must reflect absolute truth. We utilize pessimistic UI updates for critical actions like registration.
 2. **Context-Aware Design**: The app actively shapes itself around the user's immediate needs rather than forcing the user to hunt for features.

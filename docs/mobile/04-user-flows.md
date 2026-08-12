@@ -1,5 +1,8 @@
 # User Flows
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Registration & Discovery
 Users discover events via the Campus tab or direct links. Tapping an event enters the `event-discovery-flow`. Registering triggers the pessimistic `registration-flow`.
 

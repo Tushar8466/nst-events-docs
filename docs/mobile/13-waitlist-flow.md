@@ -1,5 +1,8 @@
 # Waitlist Confirmation Flow
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Context
 Waitlisted registrations require a dedicated, first-class confirmation state to prevent user confusion regarding their actual attendance status.
 

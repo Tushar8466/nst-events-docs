@@ -1,5 +1,8 @@
 # Component Taxonomy
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 Our taxonomy categorizes components strictly by their domain purpose.
 
 ## Navigation

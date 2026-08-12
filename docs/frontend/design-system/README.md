@@ -1,5 +1,8 @@
 # NST-Events Design System
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Purpose
 The NST-Events Design System is the single source of truth for all visual and interactive elements across the platform. It ensures consistency, accelerates development, and guarantees accessibility across both the Next.js Dashboard and the Expo Mobile Application.
 

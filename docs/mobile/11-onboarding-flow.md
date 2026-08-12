@@ -1,5 +1,8 @@
 # Onboarding Flow (New User Empty State)
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Context
 If a user logs in and has no clubs, no registrations, and no activity, the Home tab defaults to an Onboarding State.
 

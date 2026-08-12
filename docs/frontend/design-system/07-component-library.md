@@ -1,5 +1,8 @@
 # Component Library
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Buttons
 * **Purpose**: Primary interactions.
 * **Variants**: Primary, Secondary, Outline, Ghost, Destructive.

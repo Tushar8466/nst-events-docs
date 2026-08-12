@@ -1,5 +1,8 @@
 # Form Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 All form inputs must support uncontrolled and controlled React states, with absolute focus-visible accessibility.
 
 ## Primitives

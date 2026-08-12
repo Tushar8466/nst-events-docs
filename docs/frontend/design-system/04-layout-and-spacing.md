@@ -1,5 +1,8 @@
 # Layout & Spacing
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Grid System
 * **Web Grid**: 12-column fluid grid with maximum container width constraints (e.g., `max-w-7xl` for standard views).
 * **Mobile Grid**: 4-column responsive grid with standard 16px horizontal margins.

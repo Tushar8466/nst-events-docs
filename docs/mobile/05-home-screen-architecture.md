@@ -1,5 +1,8 @@
 # Home Screen Architecture
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Data Fetching: `get_home_feed()` RPC
 The Home tab requires extreme efficiency. It relies entirely on a single aggregated backend request: `get_home_feed()`. 
 The Home screen must **not** make multiple independent requests for core data.

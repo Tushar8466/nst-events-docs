@@ -1,5 +1,8 @@
 # Toolbar Customization Rules
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Customization
 Users may be permitted to customize their bottom tab bar.
 

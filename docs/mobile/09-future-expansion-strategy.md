@@ -1,5 +1,8 @@
 # Future Expansion Strategy
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Out of Scope Features (V1)
 The following modules have been officially documented as out of scope for the V1 release, to be revisited in later iterations:
 * **Advanced Visual Effects**: Custom GPU shaders, Liquid Glass rendering, and advanced graphics programming.

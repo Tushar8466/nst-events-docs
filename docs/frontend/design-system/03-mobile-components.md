@@ -1,5 +1,8 @@
 # Mobile Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 These components are built exclusively using NativeWind for Expo.
 
 ## Primary Components

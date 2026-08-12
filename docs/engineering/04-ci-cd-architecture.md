@@ -55,3 +55,10 @@ The CD architecture handles the safe promotion of artifacts into active environm
 2. **Infrastructure Validation Stage**: Execute automated smoke tests and health checks against the live staging environment.
 3. **Production Promotion Stage**: Upon explicit manual approval and/or merging to the production branch, deploy the artifact to production.
 4. **Zero-Downtime Verification Stage**: Ensure the new deployment handles traffic gracefully. Monitor error rates. If anomalies exceed thresholds, trigger automatic rollback procedures (see [ENG-013](./12-disaster-recovery.md)).
+
+
+## Infrastructure Security (Phase 19 Hardening)
+- **Kubernetes Security Contexts**: All workloads now run with `runAsNonRoot: true`, `readOnlyRootFilesystem: true`, and dropped capabilities.
+- **NetworkPolicies**: Strict ingress/egress NetworkPolicies isolate the API, Worker, and Database namespaces.
+- **Worker Isolation**: The worker deployment runs in a dedicated namespace with no direct ingress access.
+

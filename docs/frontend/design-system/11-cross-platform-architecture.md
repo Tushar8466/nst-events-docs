@@ -1,5 +1,8 @@
 # Cross-Platform Architecture
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Single Token Source
 To maintain exact visual parity between the Next.js Dashboard and the Expo Mobile App, both codebases consume the exact same token definitions.
 

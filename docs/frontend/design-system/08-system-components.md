@@ -1,5 +1,8 @@
 # System Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 The atomic building blocks of the UI.
 
 ## Feedback States

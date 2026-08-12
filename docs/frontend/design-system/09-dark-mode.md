@@ -1,5 +1,8 @@
 # Dark Mode
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Theme Architecture
 NST-Events provides complete Light and Dark themes.
 

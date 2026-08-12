@@ -1,5 +1,8 @@
 # Mobile Navigation Freeze V1
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Status
 FROZEN
 

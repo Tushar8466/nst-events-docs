@@ -1,5 +1,8 @@
 # Color System
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Semantic Color Architecture
 Colors are defined by their semantic purpose (e.g., `background-primary`, `text-muted`) rather than their literal hue. This enables immediate support for Dark Mode and Multi-Campus theming.
 

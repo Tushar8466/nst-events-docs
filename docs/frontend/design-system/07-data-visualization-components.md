@@ -1,5 +1,8 @@
 # Data Visualization Components
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## TrendCard
 * **Purpose**: KPI + Sparkline (e.g., "Attendance +12%").
 

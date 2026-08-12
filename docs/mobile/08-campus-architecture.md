@@ -1,5 +1,8 @@
 # Campus Architecture
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Campus Governance Rule
 The Campus tab is strictly governed. It is NOT a miscellaneous dumping ground. It contains **Shared Community Resources**.
 

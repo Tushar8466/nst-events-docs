@@ -1,5 +1,8 @@
 # Accessibility Standards
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## WCAG AA Minimum
 All components are strictly audited against WCAG 2.1 AA.
 

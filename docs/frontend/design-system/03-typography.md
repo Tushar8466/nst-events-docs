@@ -1,5 +1,8 @@
 # Typography
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 ## Brand Typefaces
 * **Sans-serif**: `Geist Sans`
 * **Monospace**: `Geist Mono`

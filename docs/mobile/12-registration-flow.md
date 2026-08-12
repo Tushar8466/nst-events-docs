@@ -1,5 +1,8 @@
 # Pessimistic Registration Flow & UI Specifications
 
+**Implementation Status:** PLANNED / IN PROGRESS
+
+
 ## Philosophy
 NST-Events operates on a strict **Pessimistic Registration Flow**. Because event capacity is highly competitive, the UI must never show "Registered" or optimistic success states before backend confirmation.
 

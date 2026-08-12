@@ -1,5 +1,8 @@
 # UI Component Inventory
 
+**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
+
+
 This is the master inventory of all UI components across the NST-Events platform.
 
 ## Navigation
