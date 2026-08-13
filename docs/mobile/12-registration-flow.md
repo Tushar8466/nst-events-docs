@@ -15,7 +15,7 @@ NST-Events operates on a strict **Pessimistic Registration Flow**. Because event
 * **Offline State**: If `navigator.onLine` is false, Register buttons are disabled.
 
 ### Skeleton Loaders & Empty States
-* **Skeleton Loaders**: While fetching data (e.g. `GET /events/:id/registrations`), display 3 pulsing grey skeleton rows representing list items.
+* **Skeleton Loaders**: While fetching data (e.g. `GET /v1/users/me/registrations` or `GET /v1/events/:id/my-registration` for participant state, as opposed to the administrative `GET /v1/events/:id/registrations` list), display 3 pulsing grey skeleton rows representing list items.
 * **Empty Registrations**: If a user has no active registrations, show an empty state graphic (e.g., calendar icon) and the text: "No upcoming events. Pull to refresh."
 * **Empty Teams**: If an event has no teams formed, show an empty state graphic with the text: "No teams formed yet. Be the first to create one!"
 * **Empty Waitlist**: "No users currently on the waitlist."
@@ -25,21 +25,21 @@ NST-Events operates on a strict **Pessimistic Registration Flow**. Because event
 ### Create Team Flow
 * **Screen**: Team Creation Modal.
 * **Navigation**: Tap "Create Team" -> Opens Modal.
-* **Loading State**: Spinner on the "Create" button while `POST /events/:id/teams` is executing. Modal cannot be closed while loading.
+* **Loading State**: Spinner on the "Create" button while `POST /v1/events/:id/teams` is executing. Modal cannot be closed while loading.
 * **Success State**: Modal dismisses, UI reflects user as Team Leader. Toast: "Team Created".
 * **Failure State**: Modal stays open, displays inline red text error.
 
 ### Join Team Flow
 * **Screen**: Team Listing Page -> Join Confirmation Dialog.
 * **Navigation**: Tap "Join" next to a team -> Opens Dialog "Join [Team Name]?".
-* **Loading State**: "Confirm" button shows spinner, calls `POST /teams/:id/join`.
+* **Loading State**: "Confirm" button shows spinner, calls `POST /v1/teams/:id/join`.
 * **Success State**: Dialog dismisses, user added to team roster.
 * **Failure State**: Dialog dismisses, Toast shows failure reason (e.g. "Capacity reached").
 
 ### Leave Team Flow
 * **Screen**: Team Detail Page.
 * **Navigation**: Tap "Leave Team" -> Opens Danger Dialog "Are you sure?".
-* **Loading State**: Spinner on "Leave" button, calls `DELETE /teams/:id/leave`.
+* **Loading State**: Spinner on "Leave" button, calls `DELETE /v1/teams/:id/leave`.
 * **Success State**: Dialog dismisses, user removed from roster.
 * **Failure State**: Toast "Failed to leave team".
 

@@ -6,7 +6,7 @@ Rate limiting is enforced at the **Express API** layer via middleware (e.g., `ex
 * **Authentication** (`POST /auth/callback`): 10 requests per minute per IP — prevents brute-force OAuth abuse.
 * **Attendance** (`POST /attendance/mark`): 5 requests per minute per user — prevents brute-forcing the QR TOTP window.
 * **QR Generation** (`POST /attendance/generate-qr`): 10 requests per minute per user.
-* **Registrations** (`POST /events/:id/register`): 10 requests per minute per user.
+* **Registrations** (`POST /v1/events/:id/register`): 10 requests per minute per user.
 * **Team Operations**: 20 requests per hour per user.
 * **Media Uploads** (pre-signed URL generation): 10 requests per hour per user.
 * **Admin Actions**: Higher limits (100/min) for authenticated Dashboard users with Admin roles.

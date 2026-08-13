@@ -3,8 +3,8 @@
 **Implementation Status:** PLANNED / IN PROGRESS
 
 
-## Data Fetching: `get_home_feed()` RPC
-The Home tab requires extreme efficiency. It relies entirely on a single aggregated backend request: `get_home_feed()`. 
+## Data Fetching: `get_home_feed()` RPC (PLANNED / TARGET API)
+The Home tab requires extreme efficiency. It is specified to rely entirely on a single aggregated backend request: `get_home_feed()`. This is currently a **PLANNED / TARGET API** and is not yet part of the implemented backend contract.
 The Home screen must **not** make multiple independent requests for core data.
 
 **RPC Return Payload:**

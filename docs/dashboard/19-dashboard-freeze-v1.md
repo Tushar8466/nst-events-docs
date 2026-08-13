@@ -1,6 +1,7 @@
 # Dashboard Freeze V1
 
-## Status: FROZEN
+**Specification Status:** SPECIFICATION FROZEN
+**Implementation Status:** PLANNED / IN PROGRESS
 ## Version: 1.0
 ## Date: 2026-06-06
 

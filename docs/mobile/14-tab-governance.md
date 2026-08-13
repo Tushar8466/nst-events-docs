@@ -4,7 +4,7 @@
 
 
 ## Customization
-Users may be permitted to customize their bottom tab bar.
+Users may be permitted to customize their bottom tab bar. (Status: AMBIGUOUS — PRODUCT DECISION REQUIRED)
 
 ## State Destruction
 If a user removes a tab from their active toolbar:

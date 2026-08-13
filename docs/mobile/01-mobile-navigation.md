@@ -7,7 +7,7 @@
 The NST-Events mobile app employs a fluid, context-aware navigation structure optimized for high-speed engagement and task completion. 
 
 ## Tab Structure
-The primary navigation relies on a customizable bottom tab bar.
+The primary navigation relies on a bottom tab bar. (Customization Status: AMBIGUOUS — PRODUCT DECISION REQUIRED)
 * **Home**: Context-aware dashboard, driven by the Priority System.
 * **Campus**: Shared Community Resources and Discovery.
 * **Profile**: Personal Records and History.

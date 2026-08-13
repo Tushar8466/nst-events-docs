@@ -1,9 +1,7 @@
 # Component Freeze V1
 
-**Implementation Status:** SPECIFICATION (PLANNED IMPLEMENTATION)
-
-
-## Status: FROZEN
+**Specification Status:** SPECIFICATION FROZEN
+**Implementation Status:** PLANNED IMPLEMENTATION
 ## Version: 1.0
 ## Date: 2026-06-06
 

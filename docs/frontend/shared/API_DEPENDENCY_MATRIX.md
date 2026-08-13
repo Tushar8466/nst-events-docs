@@ -1,0 +1,21 @@
+# API Dependency Matrix
+
+| SCREEN | PLATFORM | API | METHOD | PATH | PURPOSE | CONSUMED FIELDS | CACHE KEY | MUTATION | ERRORS | STATUS |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Event Detail | Web/Mobile | `/v1/events/:id` | GET | `/v1/events/:id` | Fetch Event Details | `title, description, start_time, end_time, location` | `['event', id]` | No | 404, 500 | PLANNED |
+| Event Detail | Web/Mobile | `/v1/events/:id/my-registration` | GET | `/v1/events/:id/my-registration` | Participant status | `status, team_id` | `['event', id, 'registration']` | No | 401 | PLANNED |
+| Registration | Mobile | `/v1/events/:id/register` | POST | `/v1/events/:id/register` | Register for event | N/A (Status 201) | N/A | Yes | 400, 401, 409 | PLANNED |
+| Registration | Mobile | `/v1/events/:id/teams` | POST | `/v1/events/:id/teams` | Create Team | `team_name` | N/A | Yes | 400, 401 | PLANNED |
+| Teams | Web/Mobile | `/v1/events/:id/teams` | GET | `/v1/events/:id/teams` | List Teams | `id, name, leader_id` | `['event', id, 'teams']` | No | 401, 500 | PLANNED |
+| Home Feed | Mobile | `/v1/events` | GET | `/v1/events` | Compose Feed Data | `title, state, is_locked, start_time` | `['events', 'list']` | No | 401, 500 | PLANNED |
+| Home Feed | Mobile | `/v1/notifications` | GET | `/v1/notifications` | Unread Badge | `length` | `['notifications', 'list']` | No | 401, 500 | PLANNED |
+| Waitlist (Organizer) | Web | `/v1/events/:id/registrations` | GET | `/v1/events/:id/registrations?filter_status=WAITLISTED` | Organizer Waitlist View | `id, user_id, registration_status, registered_at` | `['registrations', id, 'WAITLISTED']` | No | 401, 403 | PLANNED |
+| Club Detail | Web/Mobile | `/v1/clubs/:id` | GET | `/v1/clubs/:id` | Fetch Club | `id, name, description, banner_url, status` | `['club', id]` | No | 404, 500 | PLANNED |
+| Attendance | Web/Mobile | `/v1/events/:id/attendance` | GET | `/v1/events/:id/attendance` | Fetch Sessions | `id, event_id, title, start_time, end_time, open_at, close_at, geofence_radius` | `['event', id, 'sessions']` | No | 401, 404 | PLANNED |
+| Attendance Export | Web | `/v1/events/:id/attendance/export` | GET | `/v1/events/:id/attendance/export` | Download CSV | N/A (CSV blob) | N/A | No | 401, 500 | PLANNED |
+| Leaderboard | Web/Mobile | `/v1/leaderboard/students` | GET | `/v1/leaderboard/students` | Fetch Leaderboard | `user_id, display_name, total_points, attendance_points (STUBBED 0), contribution_points (STUBBED 0), competition_points (STUBBED 0)` | `['leaderboard', 'students']` | No | 401, 500 | PLANNED |
+| SSE | Web/Mobile | `/v1/events/:id/live` | GET | `/v1/events/:id/live` | Live Updates | `type`, `payload.count`, `payload.user_id`, `payload.status` (Limited to `registration_count` and `heartbeat` currently) | N/A | No | 401 | PLANNED |
+| Dashboard | Web | `/v1/dashboard/summary` | GET | `/v1/dashboard/summary` | Fetch Summary | `total_events, active_participants, etc` | `['dashboard', 'summary']` | No | 401, 500 | PLANNED |
+| Admin Audit Logs | Web | `/v1/admin/audit-logs` | GET | `/v1/admin/audit-logs` | View Platform Logs | `id, action, entity_type, entity_id, actor_id, created_at` | `['admin', 'audit-logs']` | No | 401, 403, 500 | PLANNED |
+| Admin Users | Web | `/v1/admin/users` | GET | `/v1/admin/users` | View Users List | `id, email, display_name, global_role` | `['admin', 'users']` | No | 401, 403, 500 | PLANNED |
+| Admin Role Update | Web | `/v1/admin/users/:userId/role` | POST | `/v1/admin/users/:userId/role` | Escalate Privileges| `global_role` | N/A | Yes | 401, 403, 500 | PLANNED |

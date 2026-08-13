@@ -1,30 +1,4 @@
-# API Routing Matrix
-
-> [!WARNING]
-> **For current API integration, `docs/api/02-api-routing-matrix.md` is authoritative.**
-> Historical/roadmap documents must not be used to infer current endpoints.
-
-All operations are handled by the **Express backend**. Clients never call the database directly. The "Execution Type" column describes what Express does internally.
-
-| Operation | Express Internal Execution | Reason | Security Requirements |
-|---|---|---|---|
-| View Events | Prisma Query | Simple read; RLS filters rows by user context | Valid JWT + RBAC middleware |
-| Register Event | PostgreSQL RPC (`register_event`) | Requires lock-free atomic capacity update | RBAC check + RPC atomic transaction |
-| Join Team | PostgreSQL RPC (`join_team`) | Team size validation and atomic inserts | RBAC check + Validation |
-| Leave Team | PostgreSQL RPC (`leave_team`) | Team leadership reassignment logic | RBAC check + Ownership Check |
-| Approve Event | PostgreSQL RPC (`approve_event`) | State machine transition + audit logs | `FACULTY_MENTOR` role via RBAC |
-| Reject Event | PostgreSQL RPC (`reject_event`) | State transition + notification trigger | `FACULTY_MENTOR` role via RBAC |
-| Mark Attendance | Express Route Handler → PostgreSQL RPC | ADR-005 TOTP validation, geofence check, device collision | RBAC + Geofence + Valid Token |
-| Generate QR | Express Route Handler | Cryptographic `v1` TOTP seed generation (per ADR-005) | `CLUB_ADMIN` / Core via RBAC |
-| Upload Banner | Express Route Handler (pre-signed URL) — **NEEDS REVIEW** | Storage provider TBD | RBAC check before URL is issued |
-| Send Notification | Express → PostgreSQL RPC → native queue | Defers high-latency push delivery to background worker | `CLUB_ADMIN` / Platform via RBAC |
-| Promote Member | PostgreSQL RPC | Inserts into `club_memberships` + audit | `CLUB_ADMIN` via RBAC |
-| Assign Club Admin | PostgreSQL RPC | High-privilege role escalation | `PLATFORM_ADMIN` via RBAC |
-| Create Club | PostgreSQL RPC | Complex setup (memberships, roles, audit) | `PLATFORM_ADMIN` via RBAC |
-| Archive Event | PostgreSQL RPC | State machine transition | Club Admin, Faculty Mentor, Faculty Admin, Platform Admin via RBAC |
-
-
-## Current API (Phase 21J)
+## Current API (Phase 20)
 
 | Method | Mount Prefix | Router | Local Path | Final Path | Auth | Authorization | Service | Response |
 |--------|--------------|--------|------------|------------|------|---------------|---------|----------|
@@ -87,21 +61,3 @@ All operations are handled by the **Express backend**. Clients never call the da
 | PATCH | `/users` | `usersRouter` | `/me` | `/users/me` | Required | None | `usersService.updateMe` | 200 |
 | GET | `/users` | `usersRouter` | `/:id/profile` | `/users/:id/profile` | Required | None | `usersService.getPublicProfile` | 200 |
 | POST | `/users` | `usersRouter` | `/me/push-token` | `/users/me/push-token` | Required | None | `usersService.registerPushToken` | 200 |
-| GET | `/v1/admin` | `adminAuditLogsRouter` | `/` | `/v1/admin/audit-logs` | Required | `PLATFORM_ADMIN` | `auditLogsService.listLogs` | 200 |
-| GET | `/v1/admin/users` | `adminUsersRouter` | `/` | `/v1/admin/users` | Required | `PLATFORM_ADMIN` | `adminUsersService.listUsers` | 200 |
-| POST | `/v1/admin/users` | `adminUsersRouter` | `/:userId/role` | `/v1/admin/users/:userId/role` | Required | `PLATFORM_ADMIN` | `adminUsersService.updateUserRole` | 200 |
-| GET | `/v1` | `attendanceRouter` | `/events/:id/attendance/export` | `/v1/events/:id/attendance/export` | Required | `CLUB_ADMIN, CORE_MEMBER, FACULTY_MENTOR` | `attendanceService.exportEventAttendance` | `text/csv` |
-| GET | `/v1/dashboard` | `dashboardRouter` | `/summary` | `/v1/dashboard/summary` | Required | None | `dashboardService.getSummary` | 200 |
-| GET | `/v1` | `registrationsRouter` | `/events/:id/teams` | `/v1/events/:id/teams` | Required | None | `teamsService.listTeams` | 200 |
-
-## Deferred / Future API
-
-The following endpoints are **NOT IMPLEMENTED**, are **NOT PART OF CURRENT V1**, and the frontend **MUST NOT CALL** them. They are documented here solely for historical tracking and future backlog grooming.
-
-| Method | Expected Path | Status | Reason |
-|--------|---------------|--------|--------|
-| GET | `/v1/home/feed` | DEFERRED | Mobile Home will compose data from existing APIs in parallel. The frontend MUST NOT call this. |
-| GET | `/v1/events/:id/waitlist` | DEFERRED | Organizer/admin waitlist views use `GET /v1/events/:id/registrations?filter_status=WAITLISTED`. No participant waitlist UI in V1. |
-| POST | `/v1/admin/points/adjust` | DEFERRED | Leaderboard scores are derived/immutable. Deferred until complete domain model exists. |
-| GET | `/v1/analytics/*` | DEFERRED | Deferred until concrete analytics screen, metrics, and auth model are formally specified. |
-| GET/POST | `/v1/announcements` | DEFERRED | Global messages use existing notifications infrastructure. No bulletin-board product surface in V1. |

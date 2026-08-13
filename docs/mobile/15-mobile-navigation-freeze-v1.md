@@ -1,10 +1,7 @@
 # Mobile Navigation Freeze V1
 
+**Specification Status:** SPECIFICATION FROZEN
 **Implementation Status:** PLANNED / IN PROGRESS
-
-
-## Status
-FROZEN
 
 ## Version
 1.0
@@ -14,7 +11,7 @@ FROZEN
 
 ## Accepted Tradeoffs
 * Pessimistic registration flows inherently feel slightly slower than optimistic UI, but guarantee absolute data consistency.
-* `get_home_feed()` bundles queries, which increases single-request payload size but drastically reduces connection overhead.
+* The planned `get_home_feed()` target API bundles queries, which increases single-request payload size but drastically reduces connection overhead.
 
 ## Known Limitations
 * Destroying state on tab removal requires the user to re-navigate if they accidentally remove and re-add a tab.

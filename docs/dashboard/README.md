@@ -1,7 +1,7 @@
 # Dashboard Documentation
 
 ## Purpose
-This directory contains the finalized technical documentation for the NST-Events Dashboard Architecture. The dashboard is the operational core of the platform used by Platform Admins, Faculty Admins, Faculty Mentors, Club Admins, and Core Members.
+This directory contains the approved specification documentation for the NST-Events Dashboard Architecture. The dashboard is the operational core of the platform used by Platform Admins, Faculty Admins, Faculty Mentors, Club Admins, and Core Members.
 
 ## Architecture Overview
 The dashboard is built as a Single Dashboard Shell utilizing soft navigation, a context-aware dynamic sidebar, and deep-linking URL states.
