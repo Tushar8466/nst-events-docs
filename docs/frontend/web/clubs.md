@@ -57,7 +57,7 @@ SidebarNavigation
 | Description | `description` | string | Truncated Text |
 | Status | `status` | enum | Badge (`ACTIVE`, `INACTIVE`, `DISSOLVED`) |
 | Event Count | `event_count` | number | `{count} Events` |
-| Member Count | `members` | array | `members.length` Members |
+| Member Count | `member_count` | number | `{member_count} Members` |
 
 ## 9. API Map
 - **Method**: `GET`
@@ -98,7 +98,7 @@ SidebarNavigation
 - **Invalidation**: Manual refresh.
 
 ## 18. Acceptance Criteria
-- AC-WEB-03-01: Correctly maps `event_count` and `members` array from the `GET /clubs` endpoint.
+- AC-WEB-03-01: Correctly maps `event_count` and `member_count` from the `GET /clubs` endpoint.
 - AC-WEB-03-02: Status badge correctly uses `ACTIVE`, `INACTIVE`, or `DISSOLVED`.
 - AC-WEB-03-03: "Create Club" is only visible to PLATFORM_ADMIN.
 

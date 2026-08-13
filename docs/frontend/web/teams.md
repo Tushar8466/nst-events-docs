@@ -48,7 +48,7 @@ SidebarNavigation (bg: #111827)
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| Team Name | `team_name` | string | Raw Text |
+| Team Name | `name` | string | Raw Text |
 | Member List | `members` | array | Map over array, extract `full_name` property from User object |
 
 ## 9. API Map

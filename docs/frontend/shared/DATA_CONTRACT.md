@@ -134,13 +134,14 @@ Source: `apps/api/src/modules/teams/teams.service.ts:37-47`
 
 **⚠️ Shape differs between list and detail — this is the same pattern as Registration.**
 
-### `GET /v1/clubs` (list) — camelCase, Prisma-raw
+### `GET /v1/clubs` (list) and `GET /v1/clubs/search` — manually transformed, snake_case
 | Field | Type |
 |---|---|
 | `id`, `name`, `description`, `status` | string / enum |
-| `bannerUrl`, `createdAt`, `updatedAt` | string |
+| `banner_url` | string \| null |
+| `event_count`, `member_count` | number |
 
-Source: `apps/api/src/modules/clubs/clubs.service.ts:80`
+Source: `apps/api/src/modules/clubs/clubs.service.ts:80`, `:260`
 
 ### `GET /v1/clubs/:id` (detail) — manually transformed, snake_case
 | Field | Type |
@@ -238,9 +239,7 @@ Source: `apps/api/src/modules/leaderboard/leaderboard.service.ts:52-58` (`$query
 
 Source: `apps/api/src/modules/dashboard/dashboard.service.ts:96-100`, `:29-33`, `:90-94`
 
-> **SPECIFICATION GAP**: The old contract listed `total_events`, `active_participants`, `upcoming_sessions`
-> as top-level counts. The Phase 22C audit confirms these do **NOT** exist in the backend response.
-> Any Dashboard screen spec requiring these fields must be updated to remove them or flagged for backend API changes.
+
 
 ---
 

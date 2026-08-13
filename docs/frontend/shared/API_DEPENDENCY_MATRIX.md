@@ -15,7 +15,9 @@
 | Attendance Export | Web | `/v1/events/:id/attendance/export` | GET | `/v1/events/:id/attendance/export` | Download CSV | N/A (CSV blob) | N/A | No | 401, 500 | PLANNED |
 | Leaderboard | Web/Mobile | `/v1/leaderboard/students` | GET | `/v1/leaderboard/students` | Fetch Leaderboard | `user_id, display_name, total_points, attendance_points (STUBBED 0), contribution_points (STUBBED 0), competition_points (STUBBED 0)` | `['leaderboard', 'students']` | No | 401, 500 | PLANNED |
 | SSE | Web/Mobile | `/v1/events/:id/live` | GET | `/v1/events/:id/live` | Live Updates | `type`, `payload.count`, `payload.user_id`, `payload.status` (Limited to `registration_count`, `waitlist_update`, and `heartbeat` only) | N/A | No | 401 | PLANNED |
-| Dashboard | Web | `/v1/dashboard/summary` | GET | `/v1/dashboard/summary` | Fetch Summary | `total_events, active_participants, etc` | `['dashboard', 'summary']` | No | 401, 500 | PLANNED |
+| Dashboard | Web | `/v1/dashboard/summary` | GET | `/v1/dashboard/summary` | Fetch Summary | `upcoming_events, pending_approvals, my_clubs` | `['dashboard', 'summary']` | No | 401, 500 | PLANNED |
+| Clubs List | Web | `/v1/clubs` | GET | `/v1/clubs` | Fetch Clubs | `id, name, description, banner_url, status, event_count, member_count` | `['clubs', 'list']` | No | 401, 500 | PLANNED |
+| Clubs Search | Web | `/v1/clubs/search` | GET | `/v1/clubs/search` | Search Clubs | `id, name, description, banner_url, status, event_count, member_count` | `['clubs', 'search']` | No | 401, 500 | PLANNED |
 | Admin Audit Logs | Web | `/v1/admin/audit-logs` | GET | `/v1/admin/audit-logs` | View Platform Logs | `id, action, entity_type, entity_id, actor_id, created_at` | `['admin', 'audit-logs']` | No | 401, 403, 500 | PLANNED |
 | Admin Users | Web | `/v1/admin/users` | GET | `/v1/admin/users` | View Users List | `id, email, display_name, global_role` | `['admin', 'users']` | No | 401, 403, 500 | PLANNED |
 | Admin Role Update | Web | `/v1/admin/users/:userId/role` | POST | `/v1/admin/users/:userId/role` | Escalate Privileges| `global_role` | N/A | Yes | 401, 403, 500 | PLANNED |
