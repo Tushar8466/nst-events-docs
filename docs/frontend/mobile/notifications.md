@@ -31,7 +31,7 @@ Screen (bg: #F9FAFB)
         ├── div (Unread Indicator Dot)
         ├── h3 (title)
         ├── p (body)
-        └── span (created_at)
+        └── span (createdAt)
 ```
 
 ## 7. Component Map
@@ -43,8 +43,8 @@ Screen (bg: #F9FAFB)
 |---|---|---|---|
 | Title | `title` | string | Raw Text |
 | Body | `body` | string | Raw Text |
-| Time | `created_at` | string ISO | Relative time formatting |
-| Unread State | `read_at` | string ISO (nullable) | If `read_at` is null, render unread indicator dot |
+| Time | `createdAt` | string ISO | Relative time formatting |
+| Unread State | `readAt` | string ISO (nullable) | If `readAt` is null, render unread indicator dot |
 
 ## 9. API Map
 - **Method**: `GET`
@@ -87,9 +87,9 @@ Screen (bg: #F9FAFB)
 - **Invalidation**: Optimistically update local state on read mutation.
 
 ## 18. Acceptance Criteria
-- AC-MOB-10-01: Displays notifications list and derives unread status from `read_at == null`.
+- AC-MOB-10-01: Displays notifications list and derives unread status from `readAt == null`.
 - AC-MOB-10-02: Marks items read via PATCH.
 
 ## 19. Specification Gaps / Open Decisions
-- **BLOCKED DEPENDENCY (ANNOUNCEMENTS)**: Global Announcements are blocked by BE-CONFIRMED-011. This screen strictly handles user-specific notifications (`GET /v1/notifications`).
+- **DEFERRED DEPENDENCY (ANNOUNCEMENTS)**: Global Announcements are deferred (BE-CONFIRMED-011). This screen strictly handles user-specific notifications (`GET /v1/notifications`).
 - **OPEN UX ASSUMPTION**: Deep-linking map based on notification `type` is standard UX, but specific route mappings per type are open implementation details.

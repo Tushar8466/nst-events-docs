@@ -5,7 +5,7 @@
 - **Screen Name**: Event Detail
 - **Platform**: Web
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `DATA_CONTRACT.md`, `02-api-routing-matrix.md`
 
 ## 2. Route
@@ -55,10 +55,10 @@ SidebarNavigation
 |---|---|---|---|
 | Title | `title` | string | Raw Text |
 | Organizing Clubs | `eventClubs` | array | Map `club_name` for each entry |
-| Location | `location_name` | string | Raw Text |
-| Schedule | `start_time`, `end_time` | string ISO | Formatted Time Range |
-| Registration Count | `registration_count` | number | Real-time live update via SSE |
-| Availability | `max_capacity`, `registration_count`, `state` | mixed | Client-side derived rule |
+| Location | `locationName` | string | Raw Text |
+| Schedule | `startTime`, `endTime` | string ISO | Formatted Time Range |
+| Registration Count | `registrationCount` | number | Real-time live update via SSE |
+| Availability | `maxCapacity`, `registrationCount`, `state` | mixed | Client-side derived rule |
 | Registration Status | `status` | enum | From `GET /my-registration` (`REGISTERED`, `WAITLISTED`, `CANCELLED`) |
 
 ## 9. API Map
@@ -84,7 +84,7 @@ SidebarNavigation
 
 ## 11. Interaction Specification
 - **Trigger**: Load component.
-- **Action**: Establishes SSE connection. Merges `registration_count` SSE payloads into local query cache.
+- **Action**: Establishes SSE connection. Merges `registrationCount` SSE payloads into local query cache.
 - **Trigger**: Click "Register".
 - **Action**: Navigate to `/register` sub-route.
 
@@ -99,7 +99,7 @@ SidebarNavigation
 - **Role**: `article`.
 
 ## 15. Motion
-- **Animation**: Smooth number ticker transition for `registration_count` updates.
+- **Animation**: Smooth number ticker transition for `registrationCount` updates.
 
 ## 16. Security
 - Read-only data view. Administrative action buttons must be gated strictly by user's `global_role` or club membership.
@@ -110,10 +110,10 @@ SidebarNavigation
 - **Invalidation**: Receives live updates via SSE, so cache is kept fresh automatically.
 
 ## 18. Acceptance Criteria
-- AC-WEB-04-01: Displays `location_name`, `max_capacity`, and iterating `eventClubs`.
-- AC-WEB-04-02: Receives and renders live `registration_count` via SSE payload.
+- AC-WEB-04-01: Displays `locationName`, `maxCapacity`, and iterating `eventClubs`.
+- AC-WEB-04-02: Receives and renders live `registrationCount` via SSE payload.
 - AC-WEB-04-03: Excludes any live `attendance_count` metric due to BE-CONFIRMED-012.
 
 ## 19. Specification Gaps / Open Decisions
-- **DEFERRED DEPENDENCY (SSE TYPES)**: While the `/live` SSE endpoint exists, it only broadcasts `registration_count` and `heartbeat`. The `attendance_count` and other live metrics originally planned for this screen are **DEFERRED** (BE-CONFIRMED-012) and cannot be implemented in V1.
+- **DEFERRED DEPENDENCY (SSE TYPES)**: While the `/live` SSE endpoint exists, it only broadcasts `registrationCount` and `heartbeat`. The `attendance_count` and other live metrics originally planned for this screen are **DEFERRED** (BE-CONFIRMED-012) and cannot be implemented in V1.
 - **OPEN UX ASSUMPTION**: The layout (Main Column + Action Box Sidebar) is a structural UX inference. It is a highly standard pattern for event platforms, but lacks explicit wireframe validation.

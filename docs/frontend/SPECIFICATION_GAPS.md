@@ -3,7 +3,7 @@
 ## TAB-CUSTOMIZATION-001
 - AREA: Mobile Tab Customization
 - MISSING INFORMATION: Which tabs can be customized and how
-- STATUS: PRODUCT DECISION REQUIRED
+- STATUS: PRODUCT DECISION REQUIRED (This does not block the Web implementation. For Mobile, this feature can be deferred without affecting other active screens.)
 
 ## GET_HOME_FEED-001
 - AREA: Mobile Home Screen

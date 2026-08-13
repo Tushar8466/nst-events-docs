@@ -5,7 +5,7 @@
 - **Screen Name**: Dispute Flows
 - **Platform**: Mobile (iOS/Android)
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `02-api-routing-matrix.md` (Schema undocumented)
 
 ## 2. Route

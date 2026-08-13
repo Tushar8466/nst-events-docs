@@ -1,157 +1,308 @@
 # Data Contract
 
-## User
-- `id` (string, non-null): Unique identifier.
-- `email` (string, non-null): User's email.
-- `full_name` (string, nullable): User's full name.
-- `global_role` (enum, non-null): STUDENT, FACULTY_ADMIN, PLATFORM_ADMIN
-- Source Endpoint: `GET /users/me`
-- Security: Protected, Private
+**Status: RE-VERIFIED AGAINST ACTUAL BACKEND SOURCE (Phase 22C)**
+**Backend HEAD: `f2fcc782e3e7a27f67a19778de7f391ac2144b30`**
+
+## How to read this document
+
+Unlike a typical data contract, this backend does **not** return a consistent shape
+per resource. The same logical entity (Event, Club, User, Registration) can return
+different field casing — and in some cases different fields entirely — depending on
+**which endpoint** you call. This was discovered during a Phase 22C ground-truth audit
+against actual service code (not Prisma schema, not prior docs).
+
+**Rule for engineers: identify the exact endpoint first, then use ONLY the field list
+documented under that endpoint. Do not assume a shape from one endpoint applies to
+another endpoint for the "same" resource.**
+
+Every field below is sourced from the literal object passed to `res.json()` in the
+corresponding service/controller — verified file:line citations are included. Where
+Prisma raw output is used directly, fields are `camelCase` (Prisma's default). Where
+the backend manually constructs/transforms the response object, casing may be
+`snake_case` or mixed — this is called out per endpoint.
+
+---
 
 ## Event
-- `id` (string, non-null): Event ID.
-- `title` (string, non-null): The event title (DO NOT USE `name`).
-- `description` (string, nullable): HTML or Markdown description.
-- `start_time` (string ISO, non-null): Start time.
-- `end_time` (string ISO, non-null): End time.
-- `location_name` (string, nullable): Location description.
-- `state` (enum, non-null): DRAFT, PENDING_APPROVAL, PUBLISHED, ARCHIVED
-- `max_capacity` (number, nullable): Max participants.
-- `registration_count` (number, non-null): Current registration count.
-- `eventClubs` (array, non-null): Array of associated clubs. Each entry contains `club_id`, `club_name`, and `is_primary`.
-- Source Endpoint: `GET /v1/events/:id`
-> **Note**: open/closed for registration purposes is DERIVED client-side from state == PUBLISHED && (max_capacity IS NULL OR registration_count < max_capacity) && !is_locked — there is no single backend enum for this.
 
-## Registration
-- `status` (enum, non-null): REGISTERED, WAITLISTED, CANCELLED.
-- `team_id` (string, nullable): Associated team if applicable.
-- Source Endpoint: `GET /v1/events/:id/my-registration`
-> **Note**: "not registered" is derived client-side from a 404 response on GET /v1/events/:id/my-registration, not a real enum value.
+### `GET /v1/events` (list) — camelCase, Prisma-raw + 1 manual field
+| Field | Type | Notes |
+|---|---|---|
+| `id`, `title`, `description`, `state`, `visibility` | string / enum | Prisma-raw |
+| `startTime`, `endTime`, `locationName` | string (ISO) / string | Prisma-raw |
+| `eventType`, `registrationType`, `attendanceType` | enum | Prisma-raw |
+| `isLocked`, `maxCapacity`, `registrationCount` | boolean / number | Prisma-raw |
+| `metadata`, `createdBy`, `createdAt`, `updatedAt` | object / string | Prisma-raw |
+| `location_geofence` | object \| null | **Manually appended, snake_case** — the one exception |
 
-## Team
-- `id` (string, non-null): Team ID.
-- `team_name` (string, non-null): Team name.
-- `members` (array, non-null): Array of User objects.
-- Source Endpoint: `POST /v1/events/:id/teams`
+Source: `apps/api/src/modules/events/events.service.ts:136` (list query), `:132` (geofence append)
 
-## Club
-- `id` (string, non-null): Club ID.
-- `name` (string, non-null): Club name.
-- `description` (string, nullable): Club description.
-- `banner_url` (string, nullable): Banner image URL (currently deferred).
-- `status` (enum, non-null): ACTIVE, INACTIVE, DISSOLVED.
-- `event_count` (number, non-null): Number of Events.
-- `members` (array, non-null): Array of members (`{ user_id, role, full_name, avatar_url }`).
-- Source Endpoint: `GET /clubs/:id`
+### `GET /v1/events/:id` (detail) — same shape as list
+Identical field set and casing to the list endpoint above, including the same
+`location_geofence` snake_case exception.
+
+Source: `apps/api/src/modules/events/events.service.ts:160` (detail query), `:158` (geofence append)
+
+> **Derived fields (client-side only, not backend fields):**
+> - "Open for registration" = `state === 'PUBLISHED' && (maxCapacity === null || registrationCount < maxCapacity) && !isLocked`
+> - Do not expect a single backend enum for this — compute it client-side.
+
+---
 
 ## AttendanceSession
-- `id` (string, non-null): Session ID.
-- `event_id` (string, non-null): Event ID.
-- `title` (string, non-null): Session Title.
-- `start_time` (string ISO, non-null): Session start.
-- `end_time` (string ISO, non-null): Session end.
-- `open_at` (string ISO, non-null): Scan window open time.
-- `close_at` (string ISO, non-null): Scan window close time.
-- `geofence_radius` (number, non-null): Geofence radius.
-- `created_by` (string, non-null): Creator ID.
-- `created_at` (string ISO, non-null): Creation timestamp.
-- Source Endpoint: `GET /v1/events/:id/attendance`
+
+### `GET /v1/events/:id/sessions` (list) — camelCase, Prisma-raw
+| Field | Type |
+|---|---|
+| `id`, `eventId`, `title` | string |
+| `startTime`, `endTime`, `openAt`, `closeAt` | string (ISO) |
+| `geofenceRadius` | number |
+
+Source: `apps/api/src/modules/events/events.service.ts:444` (`eventsService.listSessions`)
+
+> Note: this is a **separate route** from attendance records below. Confirmed present
+> in `docs/api/02-api-routing-matrix.md` line 66 (`GET /v1/events/:id/sessions` →
+> `eventsService.listSessions`). Do not confuse with `/attendance`.
 
 ## AttendanceRecord
-- `id` (string, non-null): Record ID.
-- `session_id` (string, non-null): Associated Session ID.
-- `user_id` (string, non-null): Participant User ID.
-- `marked_by` (string, nullable): ID of admin/organizer who marked it.
-- `marked_at` (string ISO, non-null): Timestamp of scan.
-- `method` (enum, non-null): QR, MANUAL, etc.
-- `status` (enum, non-null): PRESENT, ABSENT, EXCUSED.
-- Source Endpoint: `GET /v1/events/:id/attendance` (Nested or Array)
+
+### `GET /v1/events/:id/attendance` — camelCase, Prisma-raw
+**Note**: The response is a paginated envelope: `{ data: AttendanceRecord[], nextCursor: string | null }`, not a bare array. The fields below apply to the objects in the `data` array.
+
+| Field | Type |
+|---|---|
+| `id`, `sessionId`, `userId` | string |
+| `markedBy` | string \| null |
+| `markedAt` | string (ISO) |
+| `method` | enum (`QR`, `MANUAL`, etc.) |
+| `status` | enum (`PRESENT`, `ABSENT`, `EXCUSED`) |
+| `auditMetadata` | object |
+
+Source: `apps/api/src/modules/attendance/attendance.service.ts:194`
+
+---
+
+## Registration
+
+**⚠️ Shape differs significantly between these two endpoints — they are not the same object.**
+
+### `GET /v1/events/:id/my-registration` — manually transformed, minimal
+| Field | Type |
+|---|---|
+| `status` | enum: `REGISTERED`, `WAITLISTED`, `CANCELLED` |
+
+Source: `apps/api/src/modules/registrations/registrations.service.ts:94-97`
+
+> Note: "not registered" is derived client-side from a `404` response on this
+> endpoint — it is not a status enum value.
+>
+> This endpoint does **not** return `team_id`. If team association is needed for the
+> current user's registration, it is not available from this endpoint — flag as a
+> SPECIFICATION GAP if a screen spec requires it here.
+
+### `GET /v1/events/:id/registrations` (organizer/admin list) — camelCase, Prisma-raw
+| Field | Type |
+|---|---|
+| `id`, `eventId`, `userId`, `teamId` | string |
+| `registrationStatus` | enum |
+| `participationRole` | string |
+| `registeredAt` | string (ISO) |
+| `user.fullName`, `user.globalRole` | nested object, camelCase |
+
+Source: `apps/api/src/modules/registrations/registrations.service.ts:66`
+
+> Use `filter_status=WAITLISTED` query param on this endpoint for organizer/admin
+> waitlist views — there is no separate waitlist endpoint.
+
+---
+
+## Team
+
+### `GET /v1/events/:id/teams` — manually transformed, snake_case
+| Field | Type |
+|---|---|
+| `id`, `name` | string |
+| `leader_id`, `leader_name` | string |
+| `member_count` | number |
+| `members[].user_id`, `members[].full_name`, `members[].registration_status` | string |
+
+Source: `apps/api/src/modules/teams/teams.service.ts:37-47`
+
+---
+
+## Club
+
+**⚠️ Shape differs between list and detail — this is the same pattern as Registration.**
+
+### `GET /v1/clubs` (list) — camelCase, Prisma-raw
+| Field | Type |
+|---|---|
+| `id`, `name`, `description`, `status` | string / enum |
+| `bannerUrl`, `createdAt`, `updatedAt` | string |
+
+Source: `apps/api/src/modules/clubs/clubs.service.ts:80`
+
+### `GET /v1/clubs/:id` (detail) — manually transformed, snake_case
+| Field | Type |
+|---|---|
+| `id`, `name`, `description`, `status` | string / enum |
+| `banner_url` | string \| null |
+| `event_count` | number |
+| `members` | array |
+| `members[].user_id`, `members[].full_name`, `members[].avatar_url` | string |
+
+Source: `apps/api/src/modules/clubs/clubs.service.ts:107-123`
+
+> **Critical for implementers**: do not reuse a single `Club` TS type across both
+> endpoints. Define `ClubListItem` and `ClubDetail` as distinct types.
+
+---
+
+## User
+
+**⚠️ Shape differs between self-profile and admin list.**
+
+### `GET /v1/users/me` — manually transformed, snake_case
+| Field | Type |
+|---|---|
+| `id`, `email` | string |
+| `full_name` | string \| null |
+| `avatar_url` | string \| null |
+| `global_role` | enum: `STUDENT`, `FACULTY_ADMIN`, `PLATFORM_ADMIN` |
+| `club_memberships` | array |
+
+Source: `apps/api/src/modules/users/users.service.ts:30-41`
+
+### `GET /v1/admin/users` — camelCase, Prisma-raw
+| Field | Type |
+|---|---|
+| `id`, `email` | string |
+| `fullName` | string \| null |
+| `globalRole` | enum |
+
+Source: `apps/api/src/modules/admin/users.service.ts:39-44`
+
+> **Critical for implementers**: `/users/me` and `/admin/users` are NOT
+> interchangeable types. `full_name` (self) vs `fullName` (admin) — do not merge into
+> one `User` interface used across both.
+
+---
 
 ## Notification
-- `id` (string, non-null): Notification ID.
-- `type` (string, non-null): Category.
-- `title` (string, non-null): Alert title.
-- `body` (string, non-null): Main text.
-- `read_at` (string ISO, nullable): Read timestamp.
-- `created_at` (string ISO, non-null): Timestamp.
-- Source Endpoint: `GET /v1/notifications`
-> **Note**: read state is derived client-side as `read_at != null`.
 
-## Announcement
-- [SPECIFICATION GAP: Field schema undocumented]
-> **Note**: no CRUD endpoints exist yet — see BACKEND_CHANGES_REQUIRED.md
+### `GET /v1/notifications` — camelCase, Prisma-raw
+| Field | Type |
+|---|---|
+| `id`, `title`, `body`, `type` | string |
+| `metadata` | object |
+| `readAt` | string (ISO) \| null |
+| `createdAt` | string (ISO) |
 
-## Leaderboard (Student)
-- `user_id` (string, non-null): User ID.
-- `display_name` (string, nullable): Display Name.
-- `total_points` (number, non-null): Total Points.
-- `attendance_points` (number, non-null): STUBBED (Currently returns 0).
-- `contribution_points` (number, non-null): STUBBED (Currently returns 0).
-- `competition_points` (number, non-null): STUBBED (Currently returns 0).
-- `last_refreshed_at` (string ISO, non-null): Timestamp of last view refresh.
-- Source Endpoint: `GET /v1/leaderboard/students`
+Source: `apps/api/src/modules/notifications/notifications.service.ts:44`
 
-## Leaderboard (Club)
-- `club_id` (string, non-null): Club ID.
-- `club_name` (string, non-null): Club Name.
-- `total_points` (number, non-null): Total Points.
-- `event_count` (number, non-null): Number of Events.
-- `member_count` (number, non-null): Number of Members.
-- `last_refreshed_at` (string ISO, non-null): Timestamp of last view refresh.
-- Source Endpoint: `GET /v1/leaderboard/clubs`
+> Read state is derived client-side as `readAt != null`.
 
-## Admin User
-- `id` (string, non-null): User ID.
-- `email` (string, non-null): User email.
-- `display_name` (string, nullable): User display name.
-- `global_role` (enum, non-null): PLATFORM_ADMIN, FACULTY_ADMIN, STUDENT.
-- Source Endpoint: `GET /v1/admin/users`
+---
+
+## Leaderboard
+
+### `GET /v1/leaderboard/students` — snake_case, raw SQL projection
+| Field | Type |
+|---|---|
+| `user_id`, `display_name` | string |
+| `total_points` | number |
+| `attendance_points`, `contribution_points`, `competition_points` | number — **STUBBED, hardcoded to 0 in the materialized view; do not treat as real yet** |
+| `last_refreshed_at` | string (ISO) |
+
+Source: `apps/api/src/modules/leaderboard/leaderboard.service.ts:17-24` (`$queryRaw`)
+
+### `GET /v1/leaderboard/clubs` — snake_case, raw SQL projection
+| Field | Type |
+|---|---|
+| `club_id`, `club_name` | string |
+| `total_points`, `event_count`, `member_count` | number |
+| `last_refreshed_at` | string (ISO) |
+
+Source: `apps/api/src/modules/leaderboard/leaderboard.service.ts:52-58` (`$queryRaw`)
+
+---
 
 ## Dashboard Summary
-- `total_events` (number, non-null): Total events.
-- `active_participants` (number, non-null): Total active participants.
-- `upcoming_sessions` (number, non-null): Sessions occurring soon.
-- `pending_approvals` (number, non-null): Events pending approval.
-- Source Endpoint: `GET /v1/dashboard/summary`
+
+### `GET /v1/dashboard/summary` — manually constructed, snake_case
+| Field | Type |
+|---|---|
+| `upcoming_events` | array — each item includes `start_time` |
+| `pending_approvals` | array of objects (`{ id, title }`) |
+| `my_clubs` | array — each item includes `member_count` |
+
+Source: `apps/api/src/modules/dashboard/dashboard.service.ts:96-100`, `:29-33`, `:90-94`
+
+> **SPECIFICATION GAP**: The old contract listed `total_events`, `active_participants`, `upcoming_sessions`
+> as top-level counts. The Phase 22C audit confirms these do **NOT** exist in the backend response.
+> Any Dashboard screen spec requiring these fields must be updated to remove them or flagged for backend API changes.
+
+---
 
 ## AuditLog
-- `id` (number, non-null): ID (BigInt).
-- `entity_type` (string, non-null): Entity type.
-- `entity_id` (string, non-null): Entity ID.
-- `previous_state` (object, nullable): Previous state.
-- `new_state` (object, nullable): New state.
-- `actor_id` (string, non-null): Actor ID.
-- `action` (string, non-null): Action performed.
-- `ip_address` (string, nullable): IP address.
-- `created_at` (string ISO, non-null): Creation timestamp.
-- Source Endpoint: `GET /v1/admin/audit-logs`
 
-## LeaderboardScore
-- `sourceId` (string, non-null): Source ID.
-- `reason` (string, non-null): Reason for points.
+### `GET /v1/admin/audit-logs` — camelCase, Prisma-raw
+| Field | Type |
+|---|---|
+| `id` | string |
+| `action`, `actorId`, `entityType`, `entityId` | string |
+| `previousState`, `newState` | object \| null |
+| `ipAddress` | string \| null |
+| `createdAt` | string (ISO) |
+
+Source: `apps/api/src/modules/admin/audit-logs.service.ts:56-62`
+
+---
 
 ## SSE / Live Events
+
 - Source Endpoint: `GET /v1/events/:id/live`
 - Connection: EventSource / Server-Sent Events
 - Authentication: Bearer token via query parameter (`?token=...`)
-- Keep-Alive: Emits `heartbeat` event every 30s.
+- Keep-Alive: emits `heartbeat` every 30s
 
-> **Note**: Only 2 event types are actually implemented: `registration_count` (via pg_notify) and `heartbeat` (via Express setInterval). `attendance_count`, `session_opened`, `session_closed`, and `lock_status` are documented elsewhere in this repo but DO NOT EXIST in any trigger or emission code — do not build UI that depends on them until BACKEND_CHANGES_REQUIRED.md item for SSE is resolved.
+**CONFIRMED (Phase 22C): exactly 3 event types are emitted.** Verified against actual
+`pg_notify` trigger code and the SSE router, not against prior documentation claims.
 
-### Payload Schema
-All events are emitted as stringified JSON in the `data` field with the shape:
+All events are emitted as stringified JSON in the `data` field:
 `{ "type": string, "payload": object }`
 
-#### Event Types:
-1. **`registration_count`**
-   - `payload.count` (number, non-null): The new total registration count for the event.
-   - Emitted when: A user registers, joins a team, leaves, or cancels.
+### 1. `registration_count`
+- `payload.count` (number, non-null)
+- Emitted when: a user registers, joins a team, leaves, or cancels
+- Source: `packages/database/prisma/migrations/20260807212000_phase8_realtime_listen_notify/migration.sql:81,133,174`
 
-2. **`waitlist_update`**
-   - `payload.user_id` (string UUID, non-null): The ID of the user promoted from waitlist.
-   - `payload.status` (string, non-null): Always `"REGISTERED"`.
-   - Emitted when: A waitlisted user is automatically promoted due to a cancellation.
+### 2. `waitlist_update`
+- `payload.user_id` (string UUID, non-null)
+- `payload.status` (string, non-null) — always `"REGISTERED"`
+- Emitted when: a waitlisted user is auto-promoted due to a cancellation
+- Source: `packages/database/prisma/migrations/20260807212000_phase8_realtime_listen_notify/migration.sql:44-47`
 
-3. **`heartbeat`**
-   - `payload.timestamp` (string ISO, non-null): The server time.
-   - Emitted when: Every 30 seconds by the Express server.
+### 3. `heartbeat`
+- `payload.timestamp` (string ISO, non-null)
+- Emitted every 30s by the Express server
+- Source: `apps/api/src/modules/sse/sse.router.ts:50-52`
+
+**NOT implemented — do not build UI depending on these:** `attendance_count`,
+`session_opened`, `session_closed`, `lock_status`. These appear in older docs/ADRs but
+have no emission code anywhere in the backend.
+
+---
+
+## Announcement
+
+No CRUD endpoints exist in V1 — deferred. See `BACKEND_CHANGES_REQUIRED.md`
+(`BE-CONFIRMED-011`). Do not build a client for this resource.
+
+---
+
+## Outstanding follow-ups from this audit
+
+1. All list/detail shape mismatches (Club, User, Registration) should be flagged to
+   backend as a code-quality issue, but are NOT to be "fixed" from the frontend —
+   build against the shapes as they actually are, documented above.

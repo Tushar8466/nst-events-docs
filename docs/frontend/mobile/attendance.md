@@ -47,8 +47,8 @@ Screen (bg: #000000 / Camera Viewfinder)
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| User Name | `user_id` | string | Inferred from ID via client resolution |
-| Time | `marked_at` | string ISO | "Just now", "2m ago" |
+| User Name | `userId` | string | Inferred from ID via client resolution |
+| Time | `markedAt` | string ISO | "Just now", "2m ago" |
 | Status | `status` | enum | Badge (`PRESENT`, `ABSENT`, `EXCUSED`) |
 
 ## 9. API Map
@@ -75,7 +75,7 @@ Screen (bg: #000000 / Camera Viewfinder)
 
 ## 12. Form Specification
 - **Manual Entry**:
-  - `user_id`: Target participant.
+  - `userId`: Target participant.
   - `status`: Select (`PRESENT`, `ABSENT`, `EXCUSED`).
 
 ## 13. Responsive / Adaptation

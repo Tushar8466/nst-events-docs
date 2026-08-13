@@ -47,7 +47,7 @@ SidebarNavigation
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
 | Event Title | `title` | string | Raw Text |
-| Date & Time | `start_time`, `end_time` | string ISO | Formatted date range |
+| Date & Time | `startTime`, `endTime` | string ISO | Formatted date range |
 | Clubs | `eventClubs` | array | Map `club_name` |
 | Status | `state` | enum | Always `PENDING_APPROVAL` in this view |
 

@@ -5,7 +5,7 @@
 - **Screen Name**: Attendance Management
 - **Platform**: Web
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `DATA_CONTRACT.md`, `02-api-routing-matrix.md`
 
 ## 2. Route
@@ -37,7 +37,7 @@ SidebarNavigation
 │           ├── tr (header: Participant, Marked At, Method, Status)
 │           └── tr (record row)
 │               ├── td (User Name inferred from user_id)
-│               ├── td (marked_at)
+│               ├── td (markedAt)
 │               ├── td (method)
 │               └── td (status badge)
 ```
@@ -51,8 +51,8 @@ SidebarNavigation
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| Name | `user_id` (expanded) | string | Needs client-side join or API expansion to show `full_name` |
-| Marked At | `marked_at` | string ISO | Formatted Time |
+| Name | `userId` (expanded) | string | Needs client-side join or API expansion to show `full_name` |
+| Marked At | `markedAt` | string ISO | Formatted Time |
 | Method | `method` | enum | Raw Text |
 | Status | `status` | enum | Badge (`PRESENT`, `ABSENT`, `EXCUSED`) |
 
@@ -86,7 +86,7 @@ SidebarNavigation
 - **Trigger**: Click "Generate QR".
 - **Action**: Opens QR Modal fetching from `POST /v1/attendance/generate-qr`.
 - **Trigger**: Click "Export CSV".
-- **Action**: (Blocked).
+- **Action**: Triggers CSV download using `GET /v1/events/:id/attendance/export`.
 
 ## 12. Form Specification
 - **Manual Attendance Modal** (Inferred UX requirement for manual mark):
@@ -116,7 +116,7 @@ SidebarNavigation
 ## 18. Acceptance Criteria
 - AC-WEB-09-01: Displays attendance records correctly.
 - AC-WEB-09-02: QR generation works via POST.
-- AC-WEB-09-03: Export CSV remains blocked until BE-CONFIRMED-009 is resolved.
+- AC-WEB-09-03: Export CSV successfully triggers file download.
 
 ## 19. Specification Gaps / Open Decisions
 

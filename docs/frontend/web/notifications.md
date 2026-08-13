@@ -34,7 +34,7 @@ SidebarNavigation (bg: #111827)
 │           ├── div (Unread Indicator Dot)
 │           ├── h3 (Title)
 │           ├── p (Body)
-│           └── span (created_at Timestamp)
+│           └── span (createdAt Timestamp)
 ```
 
 ## 7. Component Map
@@ -46,18 +46,18 @@ SidebarNavigation (bg: #111827)
 |---|---|---|---|
 | Title | `title` | string | Raw Text |
 | Body | `body` | string | Raw Text |
-| Timestamp | `created_at` | string ISO | Relative time formatting (e.g., "2 hours ago") |
-| Unread State | `read_at` | string ISO (nullable) | If `read_at` is null, show unread indicator (blue dot/bold text) |
+| Timestamp | `createdAt` | string ISO | Relative time formatting (e.g., "2 hours ago") |
+| Unread State | `readAt` | string ISO (nullable) | If `readAt` is null, show unread indicator (blue dot/bold text) |
 
 ## 9. API Map
 - **Method**: `GET`
 - **Path**: `/v1/notifications`
 - **Purpose**: Fetch user notifications.
-- **Consumed Fields**: `id`, `type`, `title`, `body`, `read_at`, `created_at`
+- **Consumed Fields**: `id`, `type`, `title`, `body`, `readAt`, `createdAt`
 
 - **Method**: `PATCH`
 - **Path**: `/v1/notifications/:id/read`
-- **Purpose**: Mark a specific notification as read (updates `read_at`).
+- **Purpose**: Mark a specific notification as read (updates `readAt`).
 
 ## 10. UI States
 - **Loading**: Skeleton stack items.
@@ -66,7 +66,7 @@ SidebarNavigation (bg: #111827)
 
 ## 11. Interaction Specification
 - **Trigger**: Click Notification.
-- **Action**: Fire `PATCH /v1/notifications/:id/read` mutation (if `read_at` is currently null), then navigate to relevant screen based on `type`.
+- **Action**: Fire `PATCH /v1/notifications/:id/read` mutation (if `readAt` is currently null), then navigate to relevant screen based on `type`.
 
 ## 12. Form Specification
 - **Not Applicable**.
@@ -87,13 +87,13 @@ SidebarNavigation (bg: #111827)
 ## 17. Cache / Server State
 - **Query Key**: `['notifications']`
 - **Stale Behavior**: 5 minutes (or handled via push/SSE invalidation if applicable).
-- **Invalidation**: Update local cache optimistically on `PATCH` to set `read_at = now()`.
+- **Invalidation**: Update local cache optimistically on `PATCH` to set `readAt = now()`.
 
 ## 18. Acceptance Criteria
 - AC-WEB-07-01: Successfully fetches and displays list from `GET /v1/notifications`.
-- AC-WEB-07-02: Correctly derives unread state from `read_at == null`.
+- AC-WEB-07-02: Correctly derives unread state from `readAt == null`.
 - AC-WEB-07-03: Clicking an unread notification fires `PATCH /v1/notifications/:id/read`.
 
 ## 19. Specification Gaps / Open Decisions
-- **BLOCKED DEPENDENCY (ANNOUNCEMENTS)**: The global `Announcements` feature (CRUD operations for admins, and fetching for users) is explicitly blocked by BE-CONFIRMED-011. This specification is restricted *strictly* to `Notifications` (personal alerts). Any "Announcements" tab or UI section within this screen must be omitted or blocked until the backend gap is resolved.
+- **DEFERRED DEPENDENCY (ANNOUNCEMENTS)**: The global `Announcements` feature (CRUD operations for admins, and fetching for users) is explicitly deferred to V2 (BE-CONFIRMED-011). This specification is restricted *strictly* to `Notifications` (personal alerts). Any "Announcements" tab or UI section within this screen must be omitted.
 - **OPEN UX ASSUMPTION**: The deep-linking behavior on click (navigating to a specific screen based on notification `type`) is standard UX, but the specific routing map for each `type` string (e.g., `"EVENT_APPROVED"` -> `/(app)/events/[id]`) is not explicitly defined in the design docs. This logic will need to be fleshed out during implementation.

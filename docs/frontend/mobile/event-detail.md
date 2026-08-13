@@ -5,7 +5,7 @@
 - **Screen Name**: Event Detail
 - **Platform**: Mobile (iOS/Android)
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `DATA_CONTRACT.md`, `02-api-routing-matrix.md`
 
 ## 2. Route
@@ -52,9 +52,9 @@ Screen (bg: #FFFFFF)
 |---|---|---|---|
 | Title | `title` | string | Raw Text |
 | Organizing Clubs | `eventClubs` | array | Map `club_name` |
-| Location | `location_name` | string | Raw Text |
-| Schedule | `start_time`, `end_time` | string ISO | Formatted Time Range |
-| Registration Count | `registration_count` | number | Real-time live update via SSE |
+| Location | `locationName` | string | Raw Text |
+| Schedule | `startTime`, `endTime` | string ISO | Formatted Time Range |
+| Registration Count | `registrationCount` | number | Real-time live update via SSE |
 | Registration Status | `status` | enum | From `GET /my-registration` |
 
 ## 9. API Map
@@ -80,7 +80,7 @@ Screen (bg: #FFFFFF)
 
 ## 11. Interaction Specification
 - **Trigger**: Load component.
-- **Action**: Establishes SSE connection for `registration_count` updates if supported by mobile networking library.
+- **Action**: Establishes SSE connection for `registrationCount` updates if supported by mobile networking library.
 - **Trigger**: Tap "Register".
 - **Action**: Navigate to `MOB-06`.
 
@@ -106,8 +106,8 @@ Screen (bg: #FFFFFF)
 - **Invalidation**: Real-time via SSE.
 
 ## 18. Acceptance Criteria
-- AC-MOB-05-01: Displays `location_name`, `max_capacity`, and `eventClubs`.
-- AC-MOB-05-02: Connects to SSE endpoint and updates `registration_count`.
+- AC-MOB-05-01: Displays `locationName`, `maxCapacity`, and `eventClubs`.
+- AC-MOB-05-02: Connects to SSE endpoint and updates `registrationCount`.
 - AC-MOB-05-03: Excludes `attendance_count` per BE-CONFIRMED-012.
 
 ## 19. Specification Gaps / Open Decisions

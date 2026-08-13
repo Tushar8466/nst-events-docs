@@ -51,12 +51,11 @@ SidebarNavigation (bg: #111827)
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| "Upcoming Events" Widget | `title`, `start_time` | string, string ISO | PROPOSED response shape — GET /v1/dashboard/summary does not exist yet, this is what it SHOULD return once built, not documented reality. |
-| "Pending Approvals" Widget | `title` | string | PROPOSED response shape — GET /v1/dashboard/summary does not exist yet, this is what it SHOULD return once built, not documented reality. |
-| "My Clubs Summary" Widget | `name`, `member_count` | string, number | PROPOSED response shape — GET /v1/dashboard/summary does not exist yet, this is what it SHOULD return once built, not documented reality. |
+| "Upcoming Events" Widget | `title`, `startTime` | string, string ISO | Response shape from GET /v1/dashboard/summary. |
+| "Pending Approvals" Widget | `title` | string | Response shape from GET /v1/dashboard/summary. |
+| "My Clubs Summary" Widget | `name`, `member_count` | string, number | Response shape from GET /v1/dashboard/summary. |
 
 ## 9. API Map
-This screen cannot be implemented until `GET /v1/dashboard/summary` is built. See BACKEND_CHANGES_REQUIRED.md item #2.
 
 ## 10. UI States
 - **Loading**: Render `Card` components containing skeleton blocks (bg: `#F3F4F6` pulsing).

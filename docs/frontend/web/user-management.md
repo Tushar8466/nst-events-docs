@@ -33,9 +33,9 @@ SidebarNavigation (bg: #111827)
 │   └── table
 │       ├── tr (header: Name, Email, Role, Actions)
 │       └── tr (user row)
-│           ├── td (full_name)
+│           ├── td (fullName)
 │           ├── td (email)
-│           ├── td (global_role badge)
+│           ├── td (globalRole badge)
 │           └── td (Button: Change Role)
 ```
 
@@ -49,9 +49,9 @@ SidebarNavigation (bg: #111827)
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| Name | `full_name` | string | Raw Text (fallback to "Unknown" if null) |
+| Name | `fullName` | string | Raw Text (fallback to "Unknown" if null) |
 | Email | `email` | string | Raw Text |
-| Role | `global_role` | enum | UPPERCASE (STUDENT, FACULTY_ADMIN, PLATFORM_ADMIN) |
+| Role | `globalRole` | enum | UPPERCASE (STUDENT, FACULTY_ADMIN, PLATFORM_ADMIN) |
 
 ## 9. API Map
 - **Method**: `GET`
@@ -68,15 +68,15 @@ SidebarNavigation (bg: #111827)
 - **Loading**: Skeleton rows for the table.
 - **Empty**: N/A (Admin must exist).
 - **Error**: Error boundary.
-- **Blocked State**: Show global alert banner that User Management is currently unbuildable.
+- **Error State**: Show global alert banner if the user fetch fails.
 
 ## 11. Interaction Specification
 - **Trigger**: Click "Change Role"
-- **Action**: Opens a modal to select a new `global_role`. Submit fires `POST` mutation (Blocked).
+- **Action**: Opens a modal to select a new `global_role`. Submit fires `POST` mutation to update role.
 
 ## 12. Form Specification
 - **Role Change Modal** (Inferred UX requirement for the role change action):
-  - Field: `global_role` (Select dropdown).
+  - Field: `globalRole` (Select dropdown).
   - Values: `STUDENT`, `FACULTY_ADMIN`, `PLATFORM_ADMIN`.
 
 ## 13. Responsive / Adaptation

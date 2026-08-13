@@ -66,7 +66,7 @@ SidebarNavigation (bg: #111827)
 - **Loading**: Skeleton cards for teams.
 - **Empty**: "No teams formed yet. Be the first to create one!"
 - **Error**: Standard Error Boundary.
-- **Blocked**: Render a "Coming Soon" or "Blocked by Backend" overlay since `GET /v1/events/:id/teams` is missing.
+- **Empty State**: Render a "No Teams Found" state if the teams array is empty.
 
 ## 11. Interaction Specification
 - **Trigger**: Click "Join"

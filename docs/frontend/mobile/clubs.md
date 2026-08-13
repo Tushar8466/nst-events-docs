@@ -44,7 +44,7 @@ Screen (bg: #F9FAFB)
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| Banner | `banner_url` | string | Image src (fallback to default gradient) |
+| Banner | `bannerUrl` | string | Image src (fallback to default gradient) |
 | Name | `name` | string | Raw Text |
 | Status | `status` | enum | Badge (`ACTIVE`, `INACTIVE`, `DISSOLVED`) |
 | Event Count | `event_count` | number | `{count} Events` |

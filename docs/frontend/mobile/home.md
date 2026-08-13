@@ -42,7 +42,7 @@ Screen (bg: #F9FAFB)
 ## 8. Content / Data Map
 | Live Event | `title, state, is_locked, start_time` | string, enum, boolean, ISO | Filtered client-side from `/v1/events` where `state == PUBLISHED` and time is now |
 | Upcoming Event | `title, start_time` | string, ISO | Sorted client-side from `/v1/events` |
-| Notifications Count | `length` | number | Derived from `/v1/notifications` where `read_at == null` |
+| Notifications Count | `length` | number | Derived from `/v1/notifications` where `readAt == null` |
 
 ## 9. API Map
 - **V1 Architecture Note**: There is **NO** dedicated `/v1/home/feed` endpoint. The Mobile Home screen composes its data by parallel-fetching existing V1 endpoints.

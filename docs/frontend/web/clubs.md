@@ -52,7 +52,7 @@ SidebarNavigation
 ## 8. Content / Data Map
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
-| Banner | `banner_url` | string | Image src (fallback to gray block) |
+| Banner | `bannerUrl` | string | Image src (fallback to gray block) |
 | Name | `name` | string | Raw Text |
 | Description | `description` | string | Truncated Text |
 | Status | `status` | enum | Badge (`ACTIVE`, `INACTIVE`, `DISSOLVED`) |

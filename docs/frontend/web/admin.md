@@ -5,7 +5,7 @@
 - **Screen Name**: Admin Hub
 - **Platform**: Web
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `DATA_CONTRACT.md`, `02-api-routing-matrix.md`
 
 ## 2. Route
@@ -34,7 +34,7 @@ SidebarNavigation (bg: #111827)
 │       ├── Card (Quick Actions)
 │       │   ├── h2 (text: "Point Adjustments")
 │       │   ├── p (text: "Manually adjust student or club points.")
-│       │   └── Button (text: "Adjust Points" - DISABLED/BLOCKED)
+│       │   └── Button (text: "Adjust Points" - DISABLED (DEFERRED TO V2))
 │       └── Card (Audit Logs)
 │           ├── h2 (text: "Recent Audit Logs")
 │           └── table

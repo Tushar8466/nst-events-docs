@@ -44,9 +44,9 @@ Screen (bg: #F9FAFB)
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
 | Title | `title` | string | Raw Text |
-| Location | `location_name` | string | Raw Text |
-| Time | `start_time`, `end_time` | string ISO | Formatted date/time |
-| Capacity/Availability | `max_capacity`, `registration_count`, `state` | mixed | Client-side derived: if `state == PUBLISHED` and (`max_capacity` is null OR `registration_count < max_capacity`), display "Open", else "Closed". |
+| Location | `locationName` | string | Raw Text |
+| Time | `startTime`, `endTime` | string ISO | Formatted date/time |
+| Capacity/Availability | `maxCapacity`, `registrationCount`, `state` | mixed | Client-side derived: if `state == PUBLISHED` and (`maxCapacity` is null OR `registration_count < max_capacity`), display "Open", else "Closed". |
 
 ## 9. API Map
 - **Method**: `GET`
@@ -85,8 +85,8 @@ Screen (bg: #F9FAFB)
 - **Invalidation**: Pull to refresh.
 
 ## 18. Acceptance Criteria
-- AC-MOB-04-01: Displays `location_name` and uses `cursor`/`limit` for pagination.
-- AC-MOB-04-02: Derives the "Open"/"Closed" visual badge purely on the client side from `state`, `max_capacity`, and `registration_count` (does NOT rely on a backend `registration_state` enum).
+- AC-MOB-04-01: Displays `locationName` and uses `cursor`/`limit` for pagination.
+- AC-MOB-04-02: Derives the "Open"/"Closed" visual badge purely on the client side from `state`, `maxCapacity`, and `registrationCount` (does NOT rely on a backend `registration_state` enum).
 
 ## 19. Specification Gaps / Open Decisions
 - **OPEN UX ASSUMPTION**: A horizontal filter carousel is included at the top. The specific filtering tabs (All, Upcoming, By Club) represent standard UX, but depend on whether the backend schema supports those explicit query params (e.g., `filter_club_id` is supported, but "Upcoming" requires a date-based filter parameter).

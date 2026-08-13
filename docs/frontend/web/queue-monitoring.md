@@ -5,7 +5,7 @@
 - **Screen Name**: Queue Monitoring
 - **Platform**: Web
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `DATA_CONTRACT.md` (Schema undocumented), `02-api-routing-matrix.md`
 
 ## 2. Route

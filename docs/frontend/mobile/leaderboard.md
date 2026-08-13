@@ -5,7 +5,7 @@
 - **Screen Name**: Leaderboard
 - **Platform**: Mobile
 - **Implementation Status**: PLANNED
-- **Specification Status**: READY WITH GAPS
+- **Specification Status**: SPECIFICATION COMPLETE
 - **Canonical Source Documents**: `DATA_CONTRACT.md`, `02-api-routing-matrix.md`
 
 ## 2. Route
@@ -64,13 +64,13 @@ Screen (bg: #F9FAFB)
 - **Method**: `GET`
 - **Path**: `/v1/leaderboard/students`
 - **Purpose**: Fetch top students.
-- **Consumed Fields**: `user_id`, `display_name`, `total_points`, `attendance_points`, `contribution_points`, `competition_points`, `last_refreshed_at`
+- **Consumed Fields**: `userId`, `display_name`, `total_points`, `attendance_points`, `contribution_points`, `competition_points`, `last_refreshed_at`
 - **Status**: Exists, but breakdown points are stubbed (BE-CONFIRMED-013).
 
 - **Method**: `GET`
 - **Path**: `/v1/leaderboard/clubs`
 - **Purpose**: Fetch top clubs.
-- **Consumed Fields**: `club_id`, `club_name`, `total_points`, `event_count`, `member_count`, `last_refreshed_at`
+- **Consumed Fields**: `clubId`, `club_name`, `total_points`, `event_count`, `member_count`, `last_refreshed_at`
 - **Status**: Exists.
 
 ## 10. UI States
@@ -109,4 +109,4 @@ Screen (bg: #F9FAFB)
 - AC-MOB-13-03: The UI should handle `attendance_points`, `contribution_points`, and `competition_points` gracefully when they return as 0.
 
 ## 19. Specification Gaps / Open Decisions
-- **BLOCKED DEPENDENCY (POINTS BREAKDOWN)**: While the endpoints exist, the specific point breakdown fields (`attendance_points`, `contribution_points`, `competition_points`) are intentionally hardcoded to 0 in the database materialized view, deferred to Milestone 2 (BE-CONFIRMED-013). The frontend should be built to expect these fields as 0.
+- **DEFERRED DEPENDENCY (POINTS BREAKDOWN)**: While the endpoints exist, the specific point breakdown fields (`attendance_points`, `contribution_points`, `competition_points`) are intentionally hardcoded to 0 in the database materialized view, deferred to Milestone 2 (BE-CONFIRMED-013). The frontend should be built to expect these fields as 0.

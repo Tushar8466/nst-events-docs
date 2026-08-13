@@ -1,6 +1,6 @@
 # Backend Changes Required
 
-> **Notice**: Items from the original BACKEND-GAP-### audit not yet re-verified against code: competition results endpoints, leadership transfer endpoints. These need a follow-up codebase check before being trusted either way.
+> **Notice**: All items from the original BACKEND-GAP-### audit have been verified against the codebase. Competition results endpoints and leadership transfer endpoints are confirmed as GENUINELY MISSING and are now marked as DEFERRED.
 
 The following backend features were historically identified as gaps. This document now serves as a **HISTORICAL STATUS TRACKER**. It is NOT an open implementation list. All active V1 requirements have been met or explicitly deferred.
 
@@ -17,5 +17,7 @@ The following backend features were historically identified as gaps. This docume
 | BE-CONFIRMED-009 | `GET /v1/events/:id/attendance/export` | IMPLEMENTED | `GET /v1/events/:id/attendance/export`| Attendance Unblocked | Implemented in Phase 21J |
 | BE-CONFIRMED-010 | `GET /v1/analytics/*` | CLOSED AS NOT REQUIRED FOR V1 | None | Analytics Deferred | Not required for current V1 |
 | BE-CONFIRMED-011 | `GET/POST /v1/announcements` | DEFERRED — NOT V1 | None | Broadcast Deferred | Broadcast feature deferred |
-| BE-CONFIRMED-012 | Additional SSE types | DEFERRED | `GET /v1/events/:id/live` | Handled manually | Only `registration_count` and `heartbeat` are currently emitted |
+| BE-CONFIRMED-012 | Additional SSE types | DEFERRED | `GET /v1/events/:id/live` | Handled manually | Only `registration_count`, `waitlist_update`, and `heartbeat` are currently emitted |
 | BE-CONFIRMED-013 | Leaderboard point breakdowns | STUBBED / DEFERRED | `GET /v1/leaderboard/*` | Displays `0` for breakdowns | Backend returns hardcoded 0s for breakdown points; total_points works |
+| BE-CONFIRMED-014 | Competition Results | DEFERRED — NOT REQUIRED FOR V1 | None | N/A | Feature genuinely missing from backend |
+| BE-CONFIRMED-015 | Leadership Transfer | DEFERRED — NOT REQUIRED FOR V1 | None | N/A | Feature genuinely missing from backend |

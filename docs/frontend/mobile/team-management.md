@@ -65,7 +65,7 @@ Screen (bg: #F9FAFB)
 - **Loading**: Skeletons.
 - **Empty**: N/A (must be in a team to see this).
 - **Error**: Error boundary.
-- **Blocked State**: Show global alert banner that Team Management is currently unbuildable.
+- **Error State**: Show global alert banner if the team fetch fails.
 
 ## 11. Interaction Specification
 - **Trigger**: Tap "Leave Team".

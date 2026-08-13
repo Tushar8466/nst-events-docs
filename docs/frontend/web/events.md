@@ -49,16 +49,16 @@ SidebarNavigation (bg: #111827)
 | UI Element | Source Field | Source Type | Format / Transformation |
 |---|---|---|---|
 | Card Title | `title` | string | Raw Text |
-| Date & Time | `start_time`, `end_time` | string ISO | Raw Text |
-| Location | `location_name` | string | Raw Text (omit if null) |
-| Status Badge | `state`, `max_capacity`, `registration_count`, `is_locked` | boolean derived | UPPERCASE (OPEN, CLOSED) derived client-side |
-| Capacity | `registration_count`, `max_capacity` | number | `{registration_count} / {max_capacity}` (if max_capacity null, show "Unlimited") |
+| Date & Time | `startTime`, `endTime` | string ISO | Raw Text |
+| Location | `locationName` | string | Raw Text (omit if null) |
+| Status Badge | `state`, `maxCapacity`, `registrationCount`, `isLocked` | boolean derived | UPPERCASE (OPEN, CLOSED) derived client-side |
+| Capacity | `registrationCount`, `maxCapacity` | number | `{registration_count} / {max_capacity}` (if max_capacity null, show "Unlimited") |
 
 ## 9. API Map
 - **Method**: `GET`
 - **Path**: `/v1/events?filter_state=PUBLISHED&cursor=&limit=20`
 - **Purpose**: Fetch list of all events visible to the active role context.
-- **Consumed Fields**: `id`, `title`, `start_time`, `end_time`, `location_name`, `state`, `max_capacity`, `registration_count`, `is_locked`
+- **Consumed Fields**: `id`, `title`, `startTime`, `endTime`, `locationName`, `state`, `maxCapacity`, `registrationCount`, `isLocked`
 - **Cache Key**: `['events', 'list']`
 
 ## 10. UI States
